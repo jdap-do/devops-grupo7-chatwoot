@@ -1,0 +1,6 @@
+NAME                       IMAGE                           COMMAND                  SERVICE    CREATED          STATUS                      PORTS
+devops-grupo7-postgres-1   pgvector/pgvector:pg16          "docker-entrypoint.s…"   postgres   48 seconds ago   Up 47 seconds (healthy)     5432/tcp
+devops-grupo7-prepare-1    devops-grupo7/chatwoot:4.18.0   "bundle exec rails d…"   prepare    48 seconds ago   Exited (0) 31 seconds ago
+devops-grupo7-rails-1      devops-grupo7/chatwoot:4.18.0   "bundle exec rails s…"   rails      48 seconds ago   Up 30 seconds               127.0.0.1:3001->3000/tcp
+devops-grupo7-redis-1      redis:7.4-alpine                "docker-entrypoint.s…"   redis      48 seconds ago   Up 47 seconds (healthy)     6379/tcp
+devops-grupo7-sidekiq-1    devops-grupo7/chatwoot:4.18.0   "bundle exec sidekiq…"   sidekiq    48 seconds ago   Up 30 seconds               3000/tcp
