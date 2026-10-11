@@ -1,0 +1,92 @@
+# Separar los recursos de la instalacion anterior.
+name: devops-grupo7
+# Configuracion compartida por prepare, rails y sidekiq mediante <<: *app.
+x-app: &app
+  image: devops-grupo7/chatwoot:4.18.0
+  # Construir desde el Dockerfile del equipo.
+  build:
+    context: .
+    dockerfile: Dockerfile
+    args:
+      # Exigir la revision del codigo que se registra en la imagen.
+      SOURCE_REVISION: ${SOURCE_REVISION:?Set SOURCE_REVISION to the Git commit}
+  # Variables y credenciales locales; .env queda fuera de Git.
+  env_file: .env
+  environment:
+    RAILS_ENV: production
+    NODE_ENV: production
+    INSTALLATION_ENV: docker
+  volumes:
+    - storage_data:/app/storage
+services:
+  # Persistencia de cuentas, contactos y conversaciones con PostgreSQL y pgvector.
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: chatwoot_production
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U postgres -d chatwoot_production]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+  # Cola y cache. AOF registra operaciones para persistir los datos.
+  redis:
+    image: redis:7.4-alpine
+    env_file: .env
+    # $$ deja la expansion de la variable al shell del contenedor.
+    command: [sh, -c, 'exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"']
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [CMD-SHELL, 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+  # Preparar la base con la tarea oficial y terminar antes de Rails y Sidekiq.
+  prepare:
+    <<: *app
+    entrypoint: [bundle, exec, rails]
+    command: [db:chatwoot_prepare]
+    depends_on:
+      postgres:
+        # Esperar a que el servicio pase su comprobacion de disponibilidad.
+        condition: service_healthy
+      redis:
+        # Esperar a que el servicio pase su comprobacion de disponibilidad.
+        condition: service_healthy
+    # No reintentar automaticamente una preparacion fallida.
+    restart: "no"
+  # Servidor web; 3001 permite conservar la prueba anterior en el puerto 3000.
+  rails:
+    <<: *app
+    entrypoint: [bundle, exec, rails]
+    command: [s, -p, "3000", -b, 0.0.0.0]
+    # Publicar solo en localhost. PostgreSQL y Redis permanecen en la red interna.
+    ports:
+      - "127.0.0.1:3001:3000"
+    depends_on:
+      prepare:
+        # Arrancar solo si prepare termina con codigo 0.
+        condition: service_completed_successfully
+    restart: unless-stopped
+  # Trabajador de tareas; comparte imagen y almacenamiento con Rails.
+  sidekiq:
+    <<: *app
+    entrypoint: [bundle, exec, sidekiq]
+    command: [-C, config/sidekiq.yml]
+    depends_on:
+      prepare:
+        # Arrancar solo si prepare termina con codigo 0.
+        condition: service_completed_successfully
+    restart: unless-stopped
+# Datos persistentes. down -v los elimina; no usarlo para un reinicio normal.
+volumes:
+  postgres_data:
+  redis_data:
+  storage_data:
