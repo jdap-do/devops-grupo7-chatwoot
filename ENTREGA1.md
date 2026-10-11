@@ -25,6 +25,14 @@ Compose espera los controles de disponibilidad de PostgreSQL y Redis. El servici
 
 Imagen propia construida y arrancada localmente el 10 de octubre de 2026. La preparación inicial terminó con código 0; PostgreSQL y Redis saludables; Rails respondió HTTP 200 en localhost:3001 y Sidekiq se conectó a Redis. La prueba se realizó desde volúmenes nuevos con docker compose -f compose.entrega.yml up -d --no-build. Falta probar una conversación sobre esta imagen y completar el pipeline, escaneo y publicación.
 
+## Pipeline del grupo
+
+La configuracion del pipeline y sus pendientes se explican en
+[docs/PIPELINE_GRUPO7.md](docs/PIPELINE_GRUPO7.md). Valida PR y pushes en
+`develop` y `main`; la publicacion en GHCR ocurre solo mediante un push a `main`
+que supere construccion y escaneo. Las evidencias locales anteriores no
+demuestran todavia una ejecucion o publicacion del pipeline.
+
 ## Licencia
 
 Conservar LICENSE y los avisos originales. El contenido de enterprise/ tiene licencia distinta del código MIT; no afirmar que todo el repositorio está bajo MIT.
