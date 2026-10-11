@@ -20,3 +20,6 @@ vendor/bundle
 .github
 .codex
 docs/evidence
+.agents
+.aws
+local

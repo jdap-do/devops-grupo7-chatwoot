@@ -15,6 +15,7 @@ ENV PNPM_VERSION=${PNPM_VERSION}
 ARG BUNDLE_WITHOUT="development:test"
 ENV BUNDLE_WITHOUT=${BUNDLE_WITHOUT}
 ENV BUNDLER_VERSION=2.5.16
+ENV GRPC_RUBY_BUILD_PROCS=2
 
 ARG RAILS_SERVE_STATIC_FILES=true
 ENV RAILS_SERVE_STATIC_FILES=${RAILS_SERVE_STATIC_FILES}
@@ -73,8 +74,8 @@ RUN bundle config set --local force_ruby_platform true
 
 # Excluir dependencias de desarrollo y pruebas en la construccion de produccion.
 RUN if [ "$RAILS_ENV" = "production" ]; then \
-  bundle config set without 'development test'; bundle install -j 4 -r 3; \
-  else bundle install -j 4 -r 3; \
+  bundle config set without 'development test'; bundle install -j 2 -r 3; \
+  else bundle install -j 2 -r 3; \
   fi
 
 # Respetar las versiones resueltas en el lockfile; fallar si no coincide con package.json.
