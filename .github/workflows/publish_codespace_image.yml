@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   publish-code-space-image:
+    if: github.repository == 'chatwoot/chatwoot'
     runs-on: ubuntu-latest
 
     steps:

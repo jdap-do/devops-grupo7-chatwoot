@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   sync:
+    if: github.repository == 'chatwoot/chatwoot'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

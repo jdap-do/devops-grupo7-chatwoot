@@ -12,6 +12,7 @@ on:
 jobs:
   # Separate linting jobs for faster feedback
   lint-backend:
+    if: github.repository == 'chatwoot/chatwoot'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,6 +23,7 @@ jobs:
         run: bundle exec rubocop --parallel
 
   security-scan:
+    if: github.repository == 'chatwoot/chatwoot'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,6 +42,7 @@ jobs:
           bundle exec bundle-audit check
 
   lint-frontend:
+    if: github.repository == 'chatwoot/chatwoot'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -55,6 +58,7 @@ jobs:
 
   # Frontend tests run in parallel with backend
   frontend-tests:
+    if: github.repository == 'chatwoot/chatwoot'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,6 +74,7 @@ jobs:
 
   # Backend tests with parallelization
   backend-tests:
+    if: github.repository == 'chatwoot/chatwoot'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

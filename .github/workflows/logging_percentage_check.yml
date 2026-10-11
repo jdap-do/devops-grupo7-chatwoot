@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   log_lines_check:
+    if: github.repository == 'chatwoot/chatwoot'
     runs-on: ubuntu-latest
 
     steps:

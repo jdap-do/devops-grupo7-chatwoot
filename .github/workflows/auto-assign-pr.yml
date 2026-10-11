@@ -6,6 +6,7 @@ on:
 
 jobs:
   auto-assign:
+    if: github.repository == 'chatwoot/chatwoot'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
