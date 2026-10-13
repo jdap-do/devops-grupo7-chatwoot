@@ -56,7 +56,7 @@ comando de Rails o Sidekiq y decide qué puerto publicar en el host.
 
 ## Explicación de Docker Compose
 
-El archivo actual es `compose.entrega.yml`. Su función es definir el sistema
+El archivo de entrega es `docker-compose.yml`. El Compose original de desarrollo se conserva en `docker-compose.development.yaml` y requiere selección explícita mediante `-f`. Su función es definir el sistema
 completo para ejecutarlo localmente con un único comando. El nombre de proyecto
 `devops-grupo7` separa sus contenedores, red y volúmenes de otras instalaciones.
 
@@ -108,17 +108,15 @@ Con el entorno preparado, construir la imagen y levantar todos los servicios
 mediante un único comando:
 
 ```powershell
-docker compose -f compose.entrega.yml up -d --build
+docker compose -f docker-compose.yml up -d --build
 ```
 
 `--build` construye la imagen desde el Dockerfile y `-d` mantiene los servicios
 en segundo plano. No es necesario ejecutar `docker build` ni preparar la base
-por separado. Como comprobación opcional, `docker compose -f compose.entrega.yml
+por separado. Como comprobación opcional, `docker compose -f docker-compose.yml
 config --quiet` valida el manifiesto sin arrancar contenedores.
 
-Para cumplir literalmente el nombre `docker-compose.yml` solicitado por el
-enunciado, queda pendiente renombrar `compose.entrega.yml` y actualizar sus
-referencias. Con ese nombre, el arranque sería `docker compose up -d --build`.
+El archivo de entrega utiliza el nombre `docker-compose.yml` solicitado por el enunciado. Desde la raíz, el arranque también puede ejecutarse con `docker compose up -d --build`.
 
 ## Estado
 

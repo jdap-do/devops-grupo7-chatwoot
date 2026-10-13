@@ -33,7 +33,7 @@ CONTRIBUTING.md
 CODE_OF_CONDUCT.md
 SECURITY.md
 ENTREGA1.md
-compose.entrega.yml
+docker-compose.yml
 .yamllint-grupo7.yml
 .gitattributes
 Dockerfile

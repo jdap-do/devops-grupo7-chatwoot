@@ -36,7 +36,7 @@ jobs:
       - name: Validate YAML
         run: |
           python -m pip install yamllint==1.35.1
-          yamllint -c .yamllint-grupo7.yml .yamllint-grupo7.yml compose.entrega.yml .github/workflows/grupo7-ci.yml
+          yamllint -c .yamllint-grupo7.yml .yamllint-grupo7.yml docker-compose.yml .github/workflows/grupo7-ci.yml
 
       # Valida Compose con variables de ejemplo y el SHA actual; no arranca servicios ni usa secretos reales.
       - name: Validate Compose with Example Configuration
@@ -44,7 +44,7 @@ jobs:
           SOURCE_REVISION: ${{ github.sha }}
         run: |
           cp .env.entrega.example .env
-          docker compose -f compose.entrega.yml config --quiet
+          docker compose -f docker-compose.yml config --quiet
 
   # Tras superar lint, construye y escanea la imagen; un push a main permite publicarla en GHCR.
   build-scan:

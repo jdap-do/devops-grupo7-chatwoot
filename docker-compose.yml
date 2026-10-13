@@ -1,5 +1,5 @@
 # Levantar el sistema completo, con .env configurado, mediante:
-# docker compose -f compose.entrega.yml up -d --build
+# docker compose -f docker-compose.yml up -d --build
 # Separar los recursos de la instalacion anterior con un nombre de proyecto propio.
 name: devops-grupo7
 # Configuracion compartida por prepare, rails y sidekiq mediante <<: *app.
