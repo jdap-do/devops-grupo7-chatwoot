@@ -17,7 +17,7 @@ Un push a una rama de trabajo no lo activa: abrir el PR hacia `develop`.
 
 1. Hadolint revisa el `Dockerfile` de la raiz y bloquea errores. Las advertencias
    siguen visibles, incluidas las de paquetes Debian sin versiones fijadas.
-2. yamllint revisa `compose.entrega.yml`, el workflow y su archivo de reglas.
+2. yamllint revisa `docker-compose.yml`, el workflow y su archivo de reglas.
 3. Compose valida con `.env.entrega.example`, sin utilizar credenciales locales.
 4. Buildx construye una imagen Linux amd64 desde el codigo del commit de la
    ejecucion. `SOURCE_REVISION` registra ese commit en `/app/.git_sha`.

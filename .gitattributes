@@ -1,5 +1,5 @@
 Dockerfile text eol=lf
-compose.entrega.yml text eol=lf
+docker-compose.yml text eol=lf
 .yamllint-grupo7.yml text eol=lf
 .github/workflows/*.yml text eol=lf
 docker/entrypoints/** text eol=lf
