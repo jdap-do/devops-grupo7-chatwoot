@@ -1,10 +1,14 @@
-# Separar los recursos de la instalacion anterior.
+# Levantar el sistema completo, con .env configurado, mediante:
+# docker compose -f docker-compose.yml up -d --build
+# Separar los recursos de la instalacion anterior con un nombre de proyecto propio.
 name: devops-grupo7
 # Configuracion compartida por prepare, rails y sidekiq mediante <<: *app.
 x-app: &app
+  # Etiqueta local compartida por prepare, Rails y Sidekiq; --build genera esta imagen desde el codigo.
   image: devops-grupo7/chatwoot:4.18.0
   # Construir desde el Dockerfile del equipo.
   build:
+    # Usar la raiz del repositorio como contexto; .dockerignore excluye archivos ajenos a la imagen.
     context: .
     dockerfile: Dockerfile
     args:
@@ -12,27 +16,33 @@ x-app: &app
       SOURCE_REVISION: ${SOURCE_REVISION:?Set SOURCE_REVISION to the Git commit}
   # Variables y credenciales locales; .env queda fuera de Git.
   env_file: .env
+  # Establecer el modo de produccion y el tipo de instalacion dentro de los contenedores de la aplicacion.
   environment:
     RAILS_ENV: production
     NODE_ENV: production
     INSTALLATION_ENV: docker
   volumes:
+    # Compartir archivos y adjuntos entre los procesos de la aplicacion con almacenamiento persistente.
     - storage_data:/app/storage
 services:
   # Persistencia de cuentas, contactos y conversaciones con PostgreSQL y pgvector.
   postgres:
     image: pgvector/pgvector:pg16
     environment:
+      # Crear la base inicial y su usuario; exigir la contrasena al resolver el manifiesto.
       POSTGRES_DB: chatwoot_production
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
     volumes:
+      # Conservar los datos de PostgreSQL cuando se recrea o elimina el contenedor.
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
+      # Comprobar que PostgreSQL acepta conexiones cada cinco segundos, hasta veinte intentos.
       test: [CMD-SHELL, pg_isready -U postgres -d chatwoot_production]
       interval: 5s
       timeout: 5s
       retries: 20
+    # Reiniciar el servicio si termina, salvo que se haya detenido manualmente.
     restart: unless-stopped
   # Cola y cache. AOF registra operaciones para persistir los datos.
   redis:
@@ -41,8 +51,10 @@ services:
     # $$ deja la expansion de la variable al shell del contenedor.
     command: [sh, -c, 'exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"']
     volumes:
+      # Persistir el registro AOF y otros datos de Redis fuera del contenedor.
       - redis_data:/data
     healthcheck:
+      # Autenticarse con la contrasena de .env y exigir una respuesta PONG antes de iniciar prepare.
       test: [CMD-SHELL, 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
       interval: 5s
       timeout: 5s
@@ -50,8 +62,10 @@ services:
     restart: unless-stopped
   # Preparar la base con la tarea oficial y terminar antes de Rails y Sidekiq.
   prepare:
+    # Heredar imagen, variables y volumenes definidos en x-app.
     <<: *app
     entrypoint: [bundle, exec, rails]
+    # Ejecutar la tarea oficial de preparacion de la base como un contenedor temporal.
     command: [db:chatwoot_prepare]
     depends_on:
       postgres:
@@ -66,6 +80,7 @@ services:
   rails:
     <<: *app
     entrypoint: [bundle, exec, rails]
+    # Escuchar en todas las interfaces del contenedor y en el puerto interno 3000.
     command: [s, -p, "3000", -b, 0.0.0.0]
     # Publicar solo en localhost. PostgreSQL y Redis permanecen en la red interna.
     ports:
@@ -79,6 +94,7 @@ services:
   sidekiq:
     <<: *app
     entrypoint: [bundle, exec, sidekiq]
+    # Cargar la configuracion de colas y trabajadores del proyecto.
     command: [-C, config/sidekiq.yml]
     depends_on:
       prepare:
@@ -87,6 +103,9 @@ services:
     restart: unless-stopped
 # Datos persistentes. down -v los elimina; no usarlo para un reinicio normal.
 volumes:
+  # Base de datos relacional de Chatwoot.
   postgres_data:
+  # Persistencia de Redis para colas y cache.
   redis_data:
+  # Archivos y adjuntos de la aplicacion.
   storage_data:

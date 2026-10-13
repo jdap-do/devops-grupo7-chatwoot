@@ -1,0 +1,169 @@
+name: Group 7 - CI and Publishing
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: grupo7-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Revisa Dockerfile y manifiestos antes de permitir la construccion de la imagen.
+  lint:
+    name: Static Validation
+    runs-on: ubuntu-24.04
+    steps:
+      # Descarga el codigo de la revision de esta ejecucion para analizar sus archivos.
+      - name: Check Out Repository
+        uses: actions/checkout@v4
+
+      # 1. Validacion estatica de sintaxis y buenas practicas del Dockerfile y manifiestos.
+      # Hadolint bloquea errores del Dockerfile y muestra las advertencias sin detener el flujo.
+      - name: Validate Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: error
+
+      # Comprueba sintaxis y formato de Compose, del workflow y de las reglas de yamllint.
+      - name: Validate YAML
+        run: |
+          python -m pip install yamllint==1.35.1
+          yamllint -c .yamllint-grupo7.yml .yamllint-grupo7.yml docker-compose.yml .github/workflows/grupo7-ci.yml
+
+      # Valida Compose con variables de ejemplo y el SHA actual; no arranca servicios ni usa secretos reales.
+      - name: Validate Compose with Example Configuration
+        env:
+          SOURCE_REVISION: ${{ github.sha }}
+        run: |
+          cp .env.entrega.example .env
+          docker compose -f docker-compose.yml config --quiet
+
+  # Tras superar lint, construye y escanea la imagen; un push a main permite publicarla en GHCR.
+  build-scan:
+    name: Build, Scan and Publish
+    needs: lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      # Descarga el codigo en este runner, que es independiente del utilizado por el job lint.
+      - name: Check Out Repository
+        uses: actions/checkout@v4
+
+      # 2. Construccion de la imagen de la aplicacion.
+      # Calcula la ruta de GHCR en minusculas y la comparte con los siguientes pasos mediante outputs.
+      - name: Define Image Name
+        id: image
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: echo "name=ghcr.io/${REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      # Prepara el builder de BuildKit que construye la imagen y administra las caches.
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        id: buildx
+
+      # La cache de capas no conserva los mounts de descarga entre runners.
+      # Restaura descargas segun los lockfiles; al terminar el job guarda una nueva clave si corresponde.
+      - name: Restore Bundler and pnpm Downloads
+        id: dependency-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/grupo7-downloads
+          key: ${{ runner.os }}-amd64-grupo7-bookworm-ruby3.4.11-pnpm10.2-${{ hashFiles('Gemfile.lock', 'pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-amd64-grupo7-bookworm-ruby3.4.11-pnpm10.2-
+
+      # Inyecta las descargas en los mounts de BuildKit y las extrae al finalizar para conservarlas en CI.
+      - name: Reuse Downloads in BuildKit
+        uses: reproducible-containers/buildkit-cache-dance@v3.3.0
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          cache-map: |
+            {
+              "${{ runner.temp }}/grupo7-downloads/gems": "/gems/ruby/3.4.0/cache",
+              "${{ runner.temp }}/grupo7-downloads/pnpm": "/pnpm/store"
+            }
+          skip-extraction: ${{ steps.dependency-cache.outputs.cache-hit == 'true' }}
+
+      # Construye para linux/amd64, registra el SHA y carga la imagen local para escanearla antes de publicarla.
+      # Reutiliza y exporta capas intermedias de dependencias y recursos con cache mode=max.
+      - name: Build Image Without Publishing
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
+          build-args: SOURCE_REVISION=${{ github.sha }}
+          cache-from: type=gha,scope=grupo7
+          cache-to: type=gha,mode=max,scope=grupo7
+
+      # 3. Escaneo estatico de vulnerabilidades de la imagen construida.
+      # Genera un JSON con todas las severidades, incluidos hallazgos sin parche; este informe no bloquea por hallazgos.
+      - name: Generate Full Vulnerability Report
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
+          scanners: vuln
+          format: json
+          output: trivy-report.json
+          exit-code: '0'
+          ignore-unfixed: false
+
+      # Intenta conservar el JSON como artefacto incluso si fallo un paso anterior; avisa si no existe el archivo.
+      - name: Upload Vulnerability Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-${{ github.sha }}
+          path: trivy-report.json
+          if-no-files-found: warn
+
+      # Detiene el job si encuentra vulnerabilidades CRITICAL con correccion disponible.
+      # Reutiliza Trivy instalado en el primer escaneo; los otros hallazgos siguen visibles en el JSON completo.
+      - name: Block Fixable Critical Vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
+          scanners: vuln
+          format: table
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          skip-setup-trivy: true
+
+      # 4. Publicacion automatica de la imagen escaneada en GHCR (solo pushes a main).
+      # Autentica con GITHUB_TOKEN y permiso packages:write; se omite en PR, develop y ejecuciones manuales.
+      - name: Log In to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Publica la misma imagen escaneada con etiquetas del commit y de la entrega, y escribe su ruta en el resumen.
+      # Se ejecuta solo en un push a main despues de superar las validaciones y el bloqueo de vulnerabilidades.
+      - name: Publish Scanned Image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
+          REVISION: ${{ github.sha }}
+        run: |
+          docker push "$IMAGE:sha-$REVISION"
+          docker tag "$IMAGE:sha-$REVISION" "$IMAGE:4.18.0-grupo7"
+          docker push "$IMAGE:4.18.0-grupo7"
+          echo "Imagen publicada: $IMAGE:sha-$REVISION" >> "$GITHUB_STEP_SUMMARY"

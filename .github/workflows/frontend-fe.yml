@@ -13,6 +13,7 @@ permissions:
 
 jobs:
   test:
+    if: github.repository == 'chatwoot/chatwoot'
     runs-on: ubuntu-22.04
 
     steps:

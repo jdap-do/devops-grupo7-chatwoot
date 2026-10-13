@@ -19,6 +19,7 @@ permissions:
 
 jobs:
   nightly:
+    if: github.repository == 'chatwoot/chatwoot'
     runs-on: ubuntu-24.04
     steps:
 

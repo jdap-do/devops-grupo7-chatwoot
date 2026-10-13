@@ -11,6 +11,7 @@ tmp
 .codeclimate.yml
 public/packs
 node_modules
+.pnpm-store
 vendor/bundle
 .DS_Store
 *.swp
@@ -19,4 +20,21 @@ vendor/bundle
 .git
 .github
 .codex
-docs/evidence
+docs
+.agents
+.aws
+local
+
+# Documentacion y configuracion que no necesita la imagen de ejecucion.
+README.md
+AGENTS.md
+CLAUDE.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+SECURITY.md
+ENTREGA1.md
+docker-compose.yml
+.yamllint-grupo7.yml
+.gitattributes
+Dockerfile
+.dockerignore
