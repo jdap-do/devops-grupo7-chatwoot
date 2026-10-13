@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   test-build:
+    if: github.repository == 'chatwoot/chatwoot'
     strategy:
       fail-fast: false
       matrix:

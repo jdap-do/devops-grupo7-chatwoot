@@ -1,174 +1,122 @@
-# Adaptado de docker/Dockerfile de Chatwoot v4.18.0.
-# Construye la aplicacion desde el codigo fuente; no utiliza una imagen Chatwoot precompilada.
-# Etapas de construccion: Node aporta el ejecutable y Ruby instala las gems
-# y compila los recursos que se copiaran a la imagen final.
-FROM node:24.13.0-alpine AS node
-FROM ruby:3.4.4-alpine3.21 AS pre-builder
+# syntax=docker/dockerfile:1
+# Empaquetar Chatwoot desde el codigo fuente con binarios compatibles con glibc.
+# Etapa node: proporciona Node y npm para construir los recursos del frontend.
+FROM node:24.13.0-bookworm-slim AS node
+# Etapa base: bibliotecas y configuracion compartidas por el builder y la imagen final.
+FROM ruby:3.4.11-slim-bookworm AS base
 
-ARG NODE_VERSION="24.13.0"
-ARG PNPM_VERSION="10.2.0"
-ENV NODE_VERSION=${NODE_VERSION}
-ENV PNPM_VERSION=${PNPM_VERSION}
-
-# La configuracion predeterminada es de produccion. Estos argumentos permiten
-# ajustar la construccion sin incorporar las credenciales del entorno local.
-ARG BUNDLE_WITHOUT="development:test"
-ENV BUNDLE_WITHOUT=${BUNDLE_WITHOUT}
-ENV BUNDLER_VERSION=2.5.16
-
-ARG RAILS_SERVE_STATIC_FILES=true
-ENV RAILS_SERVE_STATIC_FILES=${RAILS_SERVE_STATIC_FILES}
-
+# Los argumentos se resuelven al construir; el modo predeterminado es produccion.
 ARG RAILS_ENV=production
-ENV RAILS_ENV=${RAILS_ENV}
+# Excluir las gems de desarrollo y pruebas en la instalacion de produccion.
+ARG BUNDLE_WITHOUT="development:test"
+# Permitir que Rails sirva los recursos compilados y deshabilitar ExecJS por defecto.
+ARG RAILS_SERVE_STATIC_FILES=true
+ARG EXECJS_RUNTIME="Disabled"
+# Persistir la configuracion, instalar gems en /gems y restringir los cargadores de libvips.
+ENV RAILS_ENV=${RAILS_ENV} \
+    BUNDLE_WITHOUT=${BUNDLE_WITHOUT} \
+    RAILS_SERVE_STATIC_FILES=${RAILS_SERVE_STATIC_FILES} \
+    EXECJS_RUNTIME=${EXECJS_RUNTIME} \
+    BUNDLE_PATH="/gems" \
+    BUNDLER_VERSION=2.5.16 \
+    VIPS_BLOCK_UNTRUSTED=1
 
-# Limitar el heap de Node a 4096 MiB durante la compilacion.
+# Bibliotecas y clientes de ejecucion; los compiladores quedan en el builder.
+# Instalar certificados, procesamiento de imagenes, cliente PostgreSQL y zonas horarias.
+# Omitir paquetes recomendados y retirar indices APT y documentacion de Bundler para reducir el tamano.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates imagemagick libpq5 libvips42 postgresql-client tzdata \
+    && rm -rf /var/lib/apt/lists/* \
+    && gem install bundler -v "$BUNDLER_VERSION" --no-document
+
+# Conservar el ejecutable Node sin incorporar aqui npm ni sus paquetes globales.
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+# Las instalaciones, recursos y comandos de la aplicacion utilizan /app como directorio de trabajo.
+WORKDIR /app
+
+# Etapa pre-builder: instala dependencias y genera los recursos que recibe runtime.
+FROM base AS pre-builder
+# Fijar pnpm y limitar el heap de Node a 4096 MiB durante la compilacion del frontend.
+ARG PNPM_VERSION="10.2.0"
 ARG NODE_OPTIONS="--max-old-space-size=4096 --openssl-legacy-provider"
-ENV NODE_OPTIONS=${NODE_OPTIONS}
-
-ENV BUNDLE_PATH="/gems"
-
-RUN apk update && apk add --no-cache \
-  openssl \
-  tar \
-  build-base \
-  tzdata \
-  postgresql-dev \
-  postgresql-client \
-  git \
-  curl \
-  xz \
-  && mkdir -p /var/app \
-  && gem install bundler -v "$BUNDLER_VERSION"
-
-COPY --from=node /usr/local/bin/node /usr/local/bin/
-COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
-RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
-  && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
-
-RUN npm install -g pnpm@${PNPM_VERSION}
-
-RUN echo 'export PNPM_HOME="/root/.local/share/pnpm"' >> /root/.shrc \
-  && echo 'export PATH="$PNPM_HOME:$PATH"' >> /root/.shrc \
-  && export PNPM_HOME="/root/.local/share/pnpm" \
-  && export PATH="$PNPM_HOME:$PATH" \
-  && pnpm --version
-
-# pnpm necesita esta ruta durante la instalacion y compilacion del frontend.
-ENV PNPM_HOME="/root/.local/share/pnpm"
+# Agregar el directorio de herramientas de pnpm al PATH de esta etapa.
+ENV NODE_OPTIONS=${NODE_OPTIONS} \
+    PNPM_HOME="/root/.local/share/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
-WORKDIR /app
+# Instalar herramientas antes de copiar los manifiestos para conservar esta capa.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential curl git libffi-dev libpq-dev libssl-dev libyaml-dev pkg-config xz-utils \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copiar primero los manifiestos para reutilizar esta capa si solo cambia el codigo.
+# Incorporar npm al builder, habilitar sus ejecutables e instalar la version fijada de pnpm.
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+    && npm install -g pnpm@${PNPM_VERSION}
+
+# Bundler puede elegir las gems Linux precompiladas del lockfile (incluido gRPC).
+# Montar solo los paquetes descargados; las gems instaladas quedan dentro de /gems.
+# Copiar manifiestos antes del codigo para reutilizar la instalacion si solo cambia la aplicacion.
 COPY Gemfile Gemfile.lock ./
+# Utilizar dos trabajadores y tres reintentos; sharing=locked protege la cache de escrituras simultaneas.
+RUN --mount=type=cache,target=/gems/ruby/3.4.0/cache,sharing=locked \
+    bundle install --jobs 2 --retry 3
 
-# Alpine utiliza musl. Algunas gems, como gRPC, requieren compilacion nativa.
-# Las herramientas y cabeceras siguientes mantienen el comportamiento del Dockerfile oficial.
-# https://github.com/googleapis/google-cloud-ruby/issues/13306
-# xz se conserva por la compilacion de libxml utilizada por Nokogiri.
-# https://github.com/chatwoot/chatwoot/issues/4045
-RUN apk update && apk add --no-cache build-base musl ruby-full ruby-dev gcc make musl-dev openssl openssl-dev g++ linux-headers xz vips
-RUN bundle config set --local force_ruby_platform true
-
-# Excluir dependencias de desarrollo y pruebas en la construccion de produccion.
-RUN if [ "$RAILS_ENV" = "production" ]; then \
-  bundle config set without 'development test'; bundle install -j 4 -r 3; \
-  else bundle install -j 4 -r 3; \
-  fi
-
-# Respetar las versiones resueltas en el lockfile; fallar si no coincide con package.json.
+# Instalar el frontend en otra capa, dependiente de sus propios manifiestos.
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+# Usar el mismo store en esta instalacion y en las tareas Rails que vuelven a ejecutar pnpm install.
+ENV npm_config_store_dir=/pnpm/store
+# Respetar el lockfile y recuperar paquetes descargados previamente en la cache de BuildKit.
+RUN --mount=type=cache,target=/pnpm/store,sharing=locked \
+    pnpm install --frozen-lockfile
 
+# Incorporar el codigo permitido por .dockerignore; .env, Git y caches locales quedan fuera del contexto.
 COPY . /app
-# Normalizar scripts a finales de linea Linux cuando el contexto proviene de Windows.
-RUN find docker bin -type f -exec sed -i 's/\r$//' {} +
+# Normalizar scripts procedentes de Windows y preparar el directorio de logs.
+RUN find docker bin -type f -exec sed -i 's/\r$//' {} + \
+    && mkdir -p /app/log
 
-# Mantener el directorio de registros si la aplicacion no envia los logs a stdout.
-# https://github.com/chatwoot/chatwoot/issues/701
-RUN mkdir -p /app/log
+# Compilar los recursos con una clave temporal y retirar dependencias del frontend.
+# La clave real se proporciona al arrancar mediante .env; la cache de pnpm tambien se monta en este paso.
+RUN --mount=type=cache,target=/pnpm/store,sharing=locked \
+    if [ "$RAILS_ENV" = "production" ]; then \
+    SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled bundle exec rake assets:precompile \
+    && rm -rf spec node_modules tmp/cache; \
+    fi
 
-# Compilar JavaScript y CSS para servirlos sin un servidor de desarrollo.
-# SECRET_KEY_BASE es un valor temporal de compilacion; la clave real se proporciona al arrancar.
-# Los tests, node_modules y la cache no se necesitan despues de generar los recursos.
-RUN if [ "$RAILS_ENV" = "production" ]; then \
-  SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled bundle exec rake assets:precompile \
-  && rm -rf spec node_modules tmp/cache; \
-  fi
-
-# Registrar la revision indicada por quien construye la imagen.
-# El argumento es obligatorio y evita depender de .git dentro del contexto.
+# La revision cambia despues de los recursos para aprovechar su cache.
+# Exigir un identificador de codigo y registrarlo sin necesitar .git dentro del contexto.
 ARG SOURCE_REVISION
 RUN test -n "$SOURCE_REVISION" && printf "%s\n" "$SOURCE_REVISION" > /app/.git_sha
+# MRI no utiliza el binario Java de concurrent-ruby, que pertenece a JRuby.
+# Retirar fuentes C, objetos de compilacion, paquetes descargados y metadatos Git antes de copiar a runtime.
+RUN find /gems/ruby/3.4.0/gems/ \( -name "*.c" -o -name "*.o" \) -delete \
+    && find /gems/ruby/3.4.0/gems/concurrent-ruby-* -name concurrent_ruby.jar -delete \
+    && rm -rf /gems/ruby/3.4.0/cache /app/.git \
+    && rm /app/.gitignore
 
-# Limpiar paquetes descargados y archivos de compilacion antes de copiar las gems.
-# Esta limpieza reduce lo transferido a la etapa final; no elimina todas las herramientas heredadas.
-RUN rm -rf /gems/ruby/3.4.0/cache/*.gem \
-  && find /gems/ruby/3.4.0/gems/ \( -name "*.c" -o -name "*.o" \) -delete \
-  && rm -rf .git \
-  && rm .gitignore
-
-# Imagen de ejecucion: recibe las dependencias instaladas y la aplicacion compilada.
-# No instala de nuevo las dependencias del proyecto ni recompila el frontend.
-FROM ruby:3.4.4-alpine3.21
-
-ARG NODE_VERSION="24.13.0"
+# Etapa runtime: reutiliza la base y recibe solo las gems instaladas y la aplicacion preparada.
+FROM base AS runtime
 ARG PNPM_VERSION="10.2.0"
-ENV NODE_VERSION=${NODE_VERSION}
-ENV PNPM_VERSION=${PNPM_VERSION}
 
-ARG BUNDLE_WITHOUT="development:test"
-ENV BUNDLE_WITHOUT=${BUNDLE_WITHOUT}
-ENV BUNDLER_VERSION=2.5.16
+# Conservar herramientas para quien construya explicitamente en modo desarrollo.
+# En produccion no se copian npm, pnpm, compiladores ni cabeceras.
+RUN --mount=type=bind,from=node,source=/usr/local/lib/node_modules,target=/node_modules \
+    if [ "$RAILS_ENV" != "production" ]; then \
+    apt-get update && apt-get install -y --no-install-recommends \
+      build-essential curl git libffi-dev libpq-dev libssl-dev libyaml-dev pkg-config \
+    && rm -rf /var/lib/apt/lists/* \
+    && cp -a /node_modules /usr/local/lib/node_modules \
+    && ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+    && npm install -g pnpm@${PNPM_VERSION}; \
+    fi
 
-ARG EXECJS_RUNTIME="Disabled"
-ENV EXECJS_RUNTIME=${EXECJS_RUNTIME}
-
-ARG RAILS_SERVE_STATIC_FILES=true
-ENV RAILS_SERVE_STATIC_FILES=${RAILS_SERVE_STATIC_FILES}
-
-ARG BUNDLE_FORCE_RUBY_PLATFORM=1
-ENV BUNDLE_FORCE_RUBY_PLATFORM=${BUNDLE_FORCE_RUBY_PLATFORM}
-
-ARG RAILS_ENV=production
-ENV RAILS_ENV=${RAILS_ENV}
-ENV BUNDLE_PATH="/gems"
-
-# Conservar los paquetes de ejecucion del oficial, incluido build-base por compatibilidad.
-# Su retirada requiere una verificacion adicional y queda fuera de este cambio de comentarios.
-RUN apk update && apk add --no-cache \
-  build-base \
-  openssl \
-  tzdata \
-  postgresql-client \
-  imagemagick \
-  git \
-  vips \
-  && gem install bundler -v "$BUNDLER_VERSION"
-
-# Restringir libvips a los cargadores de imagen que considera confiables.
-ENV VIPS_BLOCK_UNTRUSTED=1
-
-COPY --from=node /usr/local/bin/node /usr/local/bin/
-COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
-
-RUN if [ "$RAILS_ENV" != "production" ]; then \
-  apk add --no-cache curl \
-  && ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
-  && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
-  && npm install -g pnpm@${PNPM_VERSION} \
-  && pnpm --version; \
-  fi
-
+# Copiar dependencias y codigo compilado sin volver a instalar gems ni construir el frontend.
 COPY --from=pre-builder /gems/ /gems/
-COPY --from=pre-builder /app /app
+COPY --from=pre-builder /app/ /app/
 
-# Conservar el identificador de revision en la imagen de ejecucion.
-COPY --from=pre-builder /app/.git_sha /app/.git_sha
-
-WORKDIR /app
-
-# Documentar el puerto interno. Compose decide si se publica y con que puerto del host.
-# Rails y Sidekiq usan la misma imagen; Compose proporciona el comando de cada servicio.
+# Compose proporciona el comando de Rails o Sidekiq para la misma imagen.
+# EXPOSE documenta el puerto interno; su publicacion en el host se configura en Compose.
 EXPOSE 3000
