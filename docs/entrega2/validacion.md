@@ -75,6 +75,22 @@ El backend de aplicación está en `terraform/backend.tf`; no se copia al plan
 aislado de CI. El procedimiento operativo está en
 [estado-credenciales.md](estado-credenciales.md).
 
+Los lockfiles deben registrar las plataformas de desarrollo y del runner.
+Al cambiar una versión de proveedor, regenerar sus huellas desde el registro
+oficial y versionar el resultado antes de ejecutar CI:
+
+```powershell
+terraform -chdir=terraform providers lock -platform=windows_amd64 -platform=linux_amd64
+terraform -chdir=terraform/bootstrap providers lock -platform=windows_amd64 -platform=linux_amd64
+terraform -chdir=terraform/modules/persistence/examples/standalone providers lock -platform=windows_amd64 -platform=linux_amd64
+```
+
+CI conserva `-lockfile=readonly`: no modifica el lockfile para ocultar una huella
+faltante. La comprobación debe incluir tanto `init` como `validate` en Linux;
+un init exitoso con advertencias no demuestra que el paquete instalado pueda
+ser validado contra las huellas registradas. Véase la
+[documentación oficial de providers lock](https://developer.hashicorp.com/terraform/cli/commands/providers/lock).
+
 Se verificaron localmente TFLint, actionlint, las suites y el plan inicial. Estas
 comprobaciones **no constituyen una ejecución alojada en GitHub Actions**. Falta
 subir los cambios y obtener el run real del PR; su enlace y capturas deberán
