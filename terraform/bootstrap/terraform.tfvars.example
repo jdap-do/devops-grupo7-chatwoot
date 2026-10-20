@@ -1,0 +1,17 @@
+# Copiar a terraform.tfvars (ignorado) y reemplazar los nombres antes del plan.
+organization = "team7-devops-2026-2-org"
+
+workspaces = {
+  "grupo7-e2-jose" = {
+    owner          = "jose"
+    host_name      = "REPLACE_WITH_JOSE_MACHINE_NAME"
+    docker_context = "desktop-linux"
+    configuration  = "root"
+  }
+  "grupo7-e2-david-persistence" = {
+    owner          = "david"
+    host_name      = "REPLACE_WITH_DAVID_MACHINE_NAME"
+    docker_context = "desktop-linux"
+    configuration  = "persistence-example"
+  }
+}

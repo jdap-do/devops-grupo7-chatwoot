@@ -1,0 +1,11 @@
+grupo7-david-persistence-test-postgres : healthy, no published ports, not privileged
+grupo7-david-persistence-test-redis : healthy, no published ports, not privileged
+PostgreSQL authentication: missing and incorrect passwords rejected
+Redis authentication: missing and incorrect passwords rejected
+Volume preserved: grupo7-david-persistence-test-postgres-data
+Volume preserved: grupo7-david-persistence-test-redis-data
+Volume preserved: grupo7-david-persistence-test-storage-data
+PostgreSQL marker preserved: 7
+Redis marker preserved: 7
+No changes. Your infrastructure matches the configuration.
+VERIFICATION PASSED: Final; final plan exit code 0
