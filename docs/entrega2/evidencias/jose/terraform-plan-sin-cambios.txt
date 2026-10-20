@@ -1,0 +1,17 @@
+module.persistence.docker_volume.storage: Refreshing state... [id=devops-grupo7-e2-storage-data]
+module.persistence.docker_volume.redis: Refreshing state... [id=devops-grupo7-e2-redis-data]
+module.persistence.docker_volume.postgres: Refreshing state... [id=devops-grupo7-e2-postgres-data]
+module.persistence.docker_image.redis: Refreshing state... [id=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499redis:7.4-alpine@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499]
+module.persistence.docker_image.postgres: Refreshing state... [id=sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90apgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a]
+module.network.docker_network.application: Refreshing state... [id=64b4f09437f7bac8a86c596784b9abafd85613c434980ad2690c232df41aa354]
+module.persistence.docker_container.postgres: Refreshing state... [id=52899dbbc407437b38f48ad183e7ad6347b02f235918dd7079288e5602af0e06]
+module.persistence.docker_container.redis: Refreshing state... [id=de0123eddbddebd90b4f4d2618f8058257dae5f668779c9736eed762462d79cf]
+module.compute.docker_image.chatwoot: Refreshing state... [id=sha256:a07e19d2e177ca98acd3b00460e8366bc24bbc0268b0dcceb6566ed4516005e9ghcr.io/jdap-do/devops-grupo7-chatwoot@sha256:a07e19d2e177ca98acd3b00460e8366bc24bbc0268b0dcceb6566ed4516005e9]
+module.compute.docker_container.prepare: Refreshing state... [id=2b41c8d91937f5a367bb554b73fa7b8df3f9185fc8a0eb27b6abf2fec276ce00]
+module.compute.docker_container.sidekiq: Refreshing state... [id=24b637248eec7663fbc92540772971a71d071f16298967e10c7b5c5fa72e7940]
+module.compute.docker_container.rails: Refreshing state... [id=7b7bca69b129d5d66c7bdbe87ec28b89a1042d396795b416a5035988f7f7ab3f]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.

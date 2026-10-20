@@ -1,0 +1,73 @@
+name: Group 7 - Terraform Validation
+
+on:
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/grupo7-terraform.yml'
+  push:
+    branches: [develop, main]
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/grupo7-terraform.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: grupo7-terraform-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Terraform, TFLint and Docker security policies
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      TF_IN_AUTOMATION: 'true'
+      TFLINT_IMAGE: ghcr.io/terraform-linters/tflint:v0.58.1@sha256:0aedaea76dec88c8d19692986952bf80f77452ee74188866fd378375bcdd9d29
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3.1.2
+        with:
+          terraform_version: 1.16.6
+          terraform_wrapper: false
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive terraform
+
+      - name: Run TFLint on root, modules and HCP bootstrap
+        run: |
+          docker run --rm --network none \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/project,readonly" \
+            --workdir /project/terraform \
+            "$TFLINT_IMAGE" --recursive --config /project/terraform/.tflint.hcl --format compact
+
+      - name: Validate deployment root without HCP authentication
+        run: |
+          terraform -chdir=terraform init -backend=false -input=false -lockfile=readonly
+          terraform -chdir=terraform validate
+
+      - name: Validate HCP bootstrap without authentication or apply
+        run: |
+          terraform -chdir=terraform/bootstrap init -backend=false -input=false -lockfile=readonly
+          terraform -chdir=terraform/bootstrap validate
+
+      - name: Test policies and check current HCL
+        shell: pwsh
+        run: ./terraform/policies/check.ps1
+
+      - name: Initialize, validate and check an isolated example plan
+        shell: pwsh
+        run: ./terraform/policies/check-plan.ps1
+
+      - name: Check integrated root plan with isolated state
+        shell: pwsh
+        run: ./terraform/policies/check-plan.ps1 -Configuration root

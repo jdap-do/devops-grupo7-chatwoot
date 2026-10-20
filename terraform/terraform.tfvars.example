@@ -1,0 +1,4 @@
+# Configuracion publica del despliegue. No agregar credenciales.
+project_prefix = "devops-grupo7-e2"
+app_port       = 3010
+chatwoot_image = "ghcr.io/jdap-do/devops-grupo7-chatwoot@sha256:a07e19d2e177ca98acd3b00460e8366bc24bbc0268b0dcceb6566ed4516005e9"
