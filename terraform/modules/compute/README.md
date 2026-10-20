@@ -29,8 +29,8 @@ terraform -chdir=terraform/modules/compute init -backend=false -input=false
 terraform -chdir=terraform/modules/compute validate
 ```
 
-Mientras la configuración principal no invoque este módulo, debe validarse por separado. No incluir en Git los directorios `.terraform`, los estados ni los planes generados.
+La configuración principal invoca este módulo después de persistence. Las comprobaciones del plan completo se ejecutan con terraform/policies/check-plan.ps1 -Configuration root, usando un estado aislado y sin aplicar recursos. No incluir en Git los directorios `.terraform`, los estados ni los planes generados.
 
 ## Estado de integración
 
-El módulo pasó las comprobaciones locales de formato y validación con Terraform 1.16.6 y el proveedor Docker 4.6.0. Está pendiente conectarlo con `persistence` y comprobar el arranque y el segundo plan sin cambios. La configuración principal todavía incluye únicamente el módulo de red.
+El módulo pasó las comprobaciones locales de formato y validación con Terraform 1.16.6 y el proveedor Docker 4.6.0. La configuración principal conecta network, persistence y compute. Las conexiones de datos y el volumen de adjuntos llegan desde las salidas de persistence; las credenciales llegan desde las variables principales. La dependencia explícita de persistence permite esperar sus comprobaciones de salud antes de ejecutar prepare. El arranque real y el segundo plan sin cambios siguen pendientes de la prueba de despliegue.

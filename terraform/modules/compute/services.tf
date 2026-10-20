@@ -4,6 +4,7 @@ resource "docker_container" "rails" {
   image      = docker_image.chatwoot.image_id
   entrypoint = ["bundle", "exec", "rails"]
   command    = ["s", "-p", "3000", "-b", "0.0.0.0"]
+  ipc_mode   = "private"
   env        = local.app_environment
   restart    = "unless-stopped"
 
@@ -34,6 +35,7 @@ resource "docker_container" "sidekiq" {
   image      = docker_image.chatwoot.image_id
   entrypoint = ["bundle", "exec", "sidekiq"]
   command    = ["-C", "config/sidekiq.yml"]
+  ipc_mode   = "private"
   env        = local.app_environment
   restart    = "unless-stopped"
 

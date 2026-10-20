@@ -5,6 +5,7 @@ resource "docker_container" "prepare" {
   image      = docker_image.chatwoot.image_id
   entrypoint = ["bundle", "exec", "rails"]
   command    = ["db:chatwoot_prepare"]
+  ipc_mode   = "private"
   env        = local.app_environment
 
   # No debe permanecer ejecutandose ni reiniciarse tras terminar.
