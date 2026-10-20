@@ -105,3 +105,19 @@ CLAUDE.local.md
 local/
 Procfile.worktree
 .nodeterm/project.json
+
+# Terraform: estado, credenciales y planes locales.
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+*.tfplan
+*.tfplan.json
+crash.log
+crash.*.log
+.terraformrc
+terraform.rc
+credentials.tfrc.json
+state-backend.local.tf
+# Versionar .terraform.lock.hcl y ejemplos sin credenciales (*.tfvars.example).

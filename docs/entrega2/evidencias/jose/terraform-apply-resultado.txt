@@ -1,0 +1,8 @@
+module.compute.docker_container.rails: Creation complete after 0s [id=7b7bca69b129d5d66c7bdbe87ec28b89a1042d396795b416a5035988f7f7ab3f]
+
+Apply complete! Resources: 12 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+app_url = "http://localhost:3010"
+network_name = "devops-grupo7-e2-network"
