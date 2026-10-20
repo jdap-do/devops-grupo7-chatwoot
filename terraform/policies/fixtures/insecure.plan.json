@@ -1,0 +1,31 @@
+{
+  "format_version": "1.2",
+  "resource_changes": [
+    {
+      "address": "docker_container.postgres",
+      "mode": "managed",
+      "type": "docker_container",
+      "name": "postgres",
+      "change": {
+        "actions": ["create"],
+        "after_unknown": {},
+        "after": {
+          "name": "fixture-postgres",
+          "image": "postgres:latest",
+          "privileged": true,
+          "publish_all_ports": true,
+          "network_mode": "host",
+          "ports": [{"internal": 5432, "external": 5432, "ip": "0.0.0.0"}],
+          "volumes": [{"host_path": "/var/run/docker.sock", "container_path": "/var/run/docker.sock"}]
+        }
+      }
+    },
+    {
+      "address": "docker_image.postgres",
+      "mode": "managed",
+      "type": "docker_image",
+      "name": "postgres",
+      "change": {"actions": ["create"], "after_unknown": {}, "after": {"name": "postgres:latest"}}
+    }
+  ]
+}

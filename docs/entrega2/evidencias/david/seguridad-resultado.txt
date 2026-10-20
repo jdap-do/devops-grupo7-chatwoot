@@ -1,0 +1,11 @@
+PASS: Conftest verify plan (exit 0)
+PASS: Conftest verify source (exit 0)
+PASS: Current Terraform HCL source (exit 0)
+PASS: Secure fixture plan (exit 0)
+PASS: Insecure fixture plan rejected as expected (exit 1)
+PASS: Secure fixture source (exit 0)
+PASS: Insecure fixture source rejected as expected (exit 1)
+PASS: Real example plan has no changes (exit 0)
+PASS: Real example plan accepted by security policies (exit 0)
+PASS: Real plan mutation privileged=true rejected as expected (exit 1)
+No Terraform apply performed; unsafe variants were evaluated in memory only.

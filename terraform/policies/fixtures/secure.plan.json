@@ -1,0 +1,35 @@
+{
+  "format_version": "1.2",
+  "resource_changes": [
+    {
+      "address": "docker_container.postgres",
+      "mode": "managed",
+      "type": "docker_container",
+      "name": "postgres",
+      "change": {
+        "actions": ["create"],
+        "after_unknown": {},
+        "after": {
+          "name": "fixture-postgres",
+          "image": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "privileged": false,
+          "publish_all_ports": false,
+          "network_mode": "bridge",
+          "ports": [],
+          "volumes": [{"container_path": "/var/lib/postgresql/data", "volume_name": "fixture-postgres-data"}]
+        }
+      }
+    },
+    {
+      "address": "docker_image.postgres",
+      "mode": "managed",
+      "type": "docker_image",
+      "name": "postgres",
+      "change": {
+        "actions": ["create"],
+        "after_unknown": {},
+        "after": {"name": "example.invalid/postgres@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+      }
+    }
+  ]
+}
