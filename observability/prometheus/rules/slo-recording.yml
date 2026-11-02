@@ -1,0 +1,362 @@
+# Contract v3: availability_result is assigned by instrumentation, never inferred from 4xx alone.
+# Ratios use 0..1; budget remaining is intentionally allowed to be negative.
+groups:
+- name: chatwoot-slo-recording
+  interval: 15s
+  rules:
+  - record: unal_chatwoot:http_telemetry_valid:ratio
+    expr: |-
+      (min by (project, environment) (up{project="devops-grupo7",environment="lab",job="chatwoot-http"}) == 1)
+      and on (project, environment)
+      (count by (project, environment) (count by (project, environment, job, instance) (
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="good"}
+      )) == on (project, environment) count by (project, environment) (up{project="devops-grupo7",environment="lab",job="chatwoot-http"}))
+      and on (project, environment)
+      (count by (project, environment) (count by (project, environment, job, instance) (
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="bad"}
+      )) == on (project, environment) count by (project, environment) (up{project="devops-grupo7",environment="lab",job="chatwoot-http"}))
+      and on (project, environment)
+      (count by (project, environment) (count by (project, environment, job, instance) (
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}
+      )) == on (project, environment) count by (project, environment) (up{project="devops-grupo7",environment="lab",job="chatwoot-http"}))
+      and on (project, environment)
+      (count by (project, environment) (count by (project, environment, job, instance) (
+        unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good",le="0.5"}
+      )) == on (project, environment) count by (project, environment) (up{project="devops-grupo7",environment="lab",job="chatwoot-http"}))
+      and on (project, environment)
+      (count by (project, environment) (count by (project, environment, job, instance) (
+        unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good",le="+Inf"}
+      )) == on (project, environment) count by (project, environment) (up{project="devops-grupo7",environment="lab",job="chatwoot-http"}))
+      unless on (project, environment)
+      count by (project, environment) (
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result!~"good|bad|excluded"}
+      )
+  - record: unal_chatwoot:slo_history_coverage:ratio30d
+    expr: |-
+      clamp_max(
+        sum_over_time(unal_chatwoot:http_telemetry_valid:ratio[30d])
+        / (30 * 24 * 60 * 60 / 15),
+        1
+      )
+  - record: unal_chatwoot:slo_window_complete:bool30d
+    expr: unal_chatwoot:slo_history_coverage:ratio30d >= bool 1
+  - record: unal_chatwoot:slo_error_budget:ratio
+    expr: vector(0.01)
+    labels:
+      project: devops-grupo7
+      environment: lab
+      slo: availability
+  - record: unal_chatwoot:slo_error_budget:ratio
+    expr: vector(0.05)
+    labels:
+      project: devops-grupo7
+      environment: lab
+      slo: latency
+  - record: unal_chatwoot:slo_target:ratio
+    expr: 1 - unal_chatwoot:slo_error_budget:ratio
+  - record: unal_chatwoot:slo_eligible_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result=~"good|bad"}[5m]
+      ))
+    labels:
+      slo: availability
+      window: 5m
+  - record: unal_chatwoot:slo_bad_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="bad"}[5m]
+      ))
+    labels:
+      slo: availability
+      window: 5m
+  - record: unal_chatwoot:slo_eligible_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}[5m]
+      ))
+    labels:
+      slo: latency
+      window: 5m
+  - record: unal_chatwoot:slo_bad_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}[5m]
+      ))
+      -
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good",le="0.5"}[5m]
+      ))
+    labels:
+      slo: latency
+      window: 5m
+  - record: unal_chatwoot:slo_eligible_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result=~"good|bad"}[30m]
+      ))
+    labels:
+      slo: availability
+      window: 30m
+  - record: unal_chatwoot:slo_bad_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="bad"}[30m]
+      ))
+    labels:
+      slo: availability
+      window: 30m
+  - record: unal_chatwoot:slo_eligible_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}[30m]
+      ))
+    labels:
+      slo: latency
+      window: 30m
+  - record: unal_chatwoot:slo_bad_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}[30m]
+      ))
+      -
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good",le="0.5"}[30m]
+      ))
+    labels:
+      slo: latency
+      window: 30m
+  - record: unal_chatwoot:slo_eligible_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result=~"good|bad"}[1h]
+      ))
+    labels:
+      slo: availability
+      window: 1h
+  - record: unal_chatwoot:slo_bad_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="bad"}[1h]
+      ))
+    labels:
+      slo: availability
+      window: 1h
+  - record: unal_chatwoot:slo_eligible_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}[1h]
+      ))
+    labels:
+      slo: latency
+      window: 1h
+  - record: unal_chatwoot:slo_bad_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}[1h]
+      ))
+      -
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good",le="0.5"}[1h]
+      ))
+    labels:
+      slo: latency
+      window: 1h
+  - record: unal_chatwoot:slo_eligible_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result=~"good|bad"}[6h]
+      ))
+    labels:
+      slo: availability
+      window: 6h
+  - record: unal_chatwoot:slo_bad_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="bad"}[6h]
+      ))
+    labels:
+      slo: availability
+      window: 6h
+  - record: unal_chatwoot:slo_eligible_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}[6h]
+      ))
+    labels:
+      slo: latency
+      window: 6h
+  - record: unal_chatwoot:slo_bad_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}[6h]
+      ))
+      -
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good",le="0.5"}[6h]
+      ))
+    labels:
+      slo: latency
+      window: 6h
+  - record: unal_chatwoot:slo_eligible_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result=~"good|bad"}[3d]
+      ))
+    labels:
+      slo: availability
+      window: 3d
+  - record: unal_chatwoot:slo_bad_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="bad"}[3d]
+      ))
+    labels:
+      slo: availability
+      window: 3d
+  - record: unal_chatwoot:slo_eligible_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}[3d]
+      ))
+    labels:
+      slo: latency
+      window: 3d
+  - record: unal_chatwoot:slo_bad_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}[3d]
+      ))
+      -
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good",le="0.5"}[3d]
+      ))
+    labels:
+      slo: latency
+      window: 3d
+  - record: unal_chatwoot:slo_eligible_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result=~"good|bad"}[30d]
+      ))
+    labels:
+      slo: availability
+      window: 30d
+  - record: unal_chatwoot:slo_bad_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="bad"}[30d]
+      ))
+    labels:
+      slo: availability
+      window: 30d
+  - record: unal_chatwoot:slo_eligible_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}[30d]
+      ))
+    labels:
+      slo: latency
+      window: 30d
+  - record: unal_chatwoot:slo_bad_requests:increase
+    expr: |-
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good"}[30d]
+      ))
+      -
+      sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",status_class="2xx",availability_result="good",le="0.5"}[30d]
+      ))
+    labels:
+      slo: latency
+      window: 30d
+  - record: unal_chatwoot:slo_error:ratio
+    expr: |-
+      (
+        unal_chatwoot:slo_bad_requests:increase
+        / unal_chatwoot:slo_eligible_requests:increase
+      )
+      and on (project, environment, slo, window)
+      (unal_chatwoot:slo_eligible_requests:increase > 0)
+      and on (project, environment)
+      (unal_chatwoot:http_telemetry_valid:ratio == 1)
+  - record: unal_chatwoot:slo_sli:ratio
+    expr: 1 - unal_chatwoot:slo_error:ratio
+  - record: unal_chatwoot:slo_burn_rate:ratio
+    expr: |-
+      unal_chatwoot:slo_error:ratio
+      / on (project, environment, slo) group_left
+      unal_chatwoot:slo_error_budget:ratio
+  - record: unal_chatwoot:slo_budget_consumed:ratio
+    expr: unal_chatwoot:slo_burn_rate:ratio{window="30d"}
+  - record: unal_chatwoot:slo_budget_remaining:ratio
+    expr: 1 - unal_chatwoot:slo_budget_consumed:ratio
+  - record: unal_chatwoot:http_request_duration:p95_seconds
+    expr: |-
+      histogram_quantile(0.95,
+        sum by (project, environment, le) (rate(
+          unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="good"}[5m]
+        ))
+      )
+      and on (project, environment)
+      (sum by (project, environment) (rate(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="good"}[5m]
+      )) > 0)
+      and on (project, environment)
+      (unal_chatwoot:http_telemetry_valid:ratio == 1)
+    labels:
+      availability_result: good
+      window: 5m
+  - record: unal_chatwoot:http_request_duration:p95_seconds
+    expr: |-
+      histogram_quantile(0.95,
+        sum by (project, environment, le) (rate(
+          unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="bad"}[5m]
+        ))
+      )
+      and on (project, environment)
+      (sum by (project, environment) (rate(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="bad"}[5m]
+      )) > 0)
+      and on (project, environment)
+      (unal_chatwoot:http_telemetry_valid:ratio == 1)
+    labels:
+      availability_result: bad
+      window: 5m
+  - record: unal_chatwoot:http_request_duration:p95_seconds
+    expr: |-
+      histogram_quantile(0.95,
+        sum by (project, environment, le) (increase(
+          unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="good"}[30d]
+        ))
+      )
+      and on (project, environment)
+      (sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="good"}[30d]
+      )) > 0)
+      and on (project, environment)
+      (unal_chatwoot:http_telemetry_valid:ratio == 1)
+    labels:
+      availability_result: good
+      window: 30d
+  - record: unal_chatwoot:http_request_duration:p95_seconds
+    expr: |-
+      histogram_quantile(0.95,
+        sum by (project, environment, le) (increase(
+          unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="bad"}[30d]
+        ))
+      )
+      and on (project, environment)
+      (sum by (project, environment) (increase(
+        unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",availability_result="bad"}[30d]
+      )) > 0)
+      and on (project, environment)
+      (unal_chatwoot:http_telemetry_valid:ratio == 1)
+    labels:
+      availability_result: bad
+      window: 30d
+  - record: unal_chatwoot:http_requests:rate5m
+    expr: |-
+      sum by (project, environment, status_class, availability_result) (
+        rate(unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http"}[5m])
+      )
