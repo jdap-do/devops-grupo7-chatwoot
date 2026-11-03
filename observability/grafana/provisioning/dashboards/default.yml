@@ -1,0 +1,11 @@
+apiVersion: 1
+providers:
+  - name: Chatwoot UNAL
+    orgId: 1
+    folder: DevOps UNAL
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    updateIntervalSeconds: 15
+    options:
+      path: /var/lib/grafana/dashboards

@@ -2,15 +2,13 @@
 
 Fecha de revisión: 2 de noviembre de 2026. Grupo 7.
 
-Estado: definición de diseño alineada con la revisión 4 del plan y el contrato v3. La guía metodológica final es Google SRE. El laboratorio tiene pocos usuarios simultáneos. Este documento desarrolla el apartado 2 del informe; no acredita mediciones ejecutadas, 30 días de cumplimiento ni implementación por parte de José.
+Este documento define los indicadores, objetivos y política de Error Budget de la integración de Chatwoot. La guía metodológica es Google SRE. El laboratorio tiene pocos usuarios simultáneos e historial parcial; los resultados disponibles no acreditan 30 días de cumplimiento.
 
 ## 1. Autoridad y decisiones de diseño
 
 Se adoptan indicadores basados en eventos buenos sobre eventos elegibles [G1]. Para disponibilidad se excluyen únicamente redirecciones y errores confirmados del cliente; para latencia se distinguen respuestas exitosas y fallidas [G3]. Las fuentes se aplican al alcance declarado y no se presentan sus ejemplos como reglas universales.
 
-Se fijan como compromisos del laboratorio disponibilidad de al menos 99 % y al menos 95 % de respuestas exitosas completadas en 500 milisegundos o menos, sobre 30 días móviles. Son decisiones del equipo, pendientes de validación experimental, no umbrales universales de Google. Se conserva el percentil 95 como representación de latencia y se usa el conteo directo por umbral para el presupuesto.
-
-Los requisitos académicos utilizados son los fragmentos suministrados en la sesión. No se dispone en esta copia de los documentos oficiales completos; su contraste íntegro sigue pendiente.
+Se fijan como compromisos del laboratorio disponibilidad de al menos 99 % y al menos 95 % de respuestas exitosas completadas en 500 milisegundos o menos, sobre 30 días móviles. Son decisiones del equipo para este entorno, no umbrales universales de Google ni capacidades garantizadas por la prueba de laboratorio. Se conserva el percentil 95 como representación de latencia y se usa el conteo directo por umbral para el presupuesto.
 
 ## 2. Recorrido de usuario y población
 
@@ -28,7 +26,7 @@ Para latencia, la población es únicamente la de respuestas exitosas `2xx`: bue
 
 Las series son `unal_chatwoot_http_requests_total` y el histograma clásico `unal_chatwoot_http_request_duration_seconds`, con etiquetas `project="devops-grupo7"`, `environment="lab"`, `method`, `status_class` y `availability_result`. Los buckets son `0.05`, `0.1`, `0.25`, `0.5`, `1`, `2.5`, `5`, `10` y `+Inf`, en segundos. El gauge `unal_chatwoot_http_in_flight_requests` aporta concurrencia del recorrido. Las combinaciones se inicializan en cero; falta de series no significa cero errores.
 
-El gateway tendrá un deadline total upstream de 5 segundos, que José deberá implementar y probar. Ese límite de protección no es una meta de rendimiento. La configuración estática de SQL y de los middlewares tampoco permite deducir el tiempo normal ni el peor caso integral de una petición.
+El gateway aplica un deadline total upstream de 5 segundos. Ese límite de protección no es una meta de rendimiento. La configuración estática de SQL y de los middlewares tampoco permite deducir el tiempo normal ni el peor caso integral de una petición.
 
 ## 3. Disponibilidad: concepto, fórmula y consulta
 
@@ -180,19 +178,19 @@ Las alertas de burn rate no tendrán un `for: 2m` adicional: las ventanas repres
 
 Se documentarán precisión, detección, recuperación y sensibilidad al bajo tráfico. La referencia de 2 %, 5 % y 10 % de consumo corresponde a la relación entre ventanas de alerta y 30 días bajo volumen comparable; no es una garantía del consumo real cuando el tráfico varía o el historial es parcial. No se exigirá un mínimo arbitrario de eventos que oculte fallas. En el laboratorio se generará tráfico representativo controlado y se declarará su naturaleza sintética.
 
-José conecta Prometheus con Alertmanager y un receptor verificable; David define agrupación, severidades y supresión de la notificación de seguimiento cuando ya exista la inmediata del mismo SLO. El receptor puede ser un webhook local con registro de entrega. Ningún canal externo se activa sin autorización. El criterio de terminado incluye notificaciones de activación y resolución; ver una regla activa no basta.
+Prometheus se conecta con Alertmanager y un receptor webhook local con registro persistente de entrega. Se configuran agrupación, severidades y supresión de la notificación de seguimiento cuando ya exista la inmediata del mismo SLO. La validación comprende notificaciones de activación y resolución; ver una regla activa no basta.
 
 El runbook declara impacto, coordinación y responsable técnico, registra acciones, diagnostica, mitiga, comprueba recuperación y documenta seguimiento [G6]. Su aplicación se adapta al equipo real de dos integrantes.
 
-## 9. Validaciones pendientes e integración
+## 9. Validación e integración
 
-La integración utilizará la revisión 4 del plan y el contrato v3, incluida la clasificación availability_result. La instrumentación probará las cuatro lecturas autenticadas, contadores e histogramas coherentes, 502/504, deadline total, exclusiones y bucket 0.5. Las reglas y paneles aplicarán los mismos filtros.
+La integración utiliza la clasificación `availability_result`. La instrumentación se verificó para las cuatro lecturas autenticadas, la coherencia de contadores e histogramas, las respuestas 502/504, el deadline total, las exclusiones y el bucket 0.5. Las reglas y paneles aplican el mismo alcance y las poblaciones de cada SLO.
 
-Los escenarios de cálculo comprueban cumplimiento, errores rápidos, éxito lento, exclusiones confirmadas, 429 por saturación, 4xx sin atribución confirmada, cero tráfico, ausencia de 2xx, pérdida de métricas, resets, límites y recuperación. Se verificarán los tres pares de ventanas, ausencia de `for` en burn rate y entrega firing/resolved. Se han comprobado las 40 recording rules y 29 escenarios sintéticos con promtool 3.13.5. Las pruebas de alertas y de instrumentación sobre Chatwoot real corresponden a etapas posteriores.
+Los escenarios sintéticos comprueban cumplimiento, errores rápidos, éxito lento, exclusiones confirmadas, 429 por saturación, 4xx sin atribución confirmada, cero tráfico, ausencia de 2xx, pérdida de métricas, resets, límites y recuperación. Las pruebas de reglas cubren los tres pares de ventanas y la ausencia de `for` en burn rate. Se verificaron las reglas con promtool y las consultas del dashboard a través de Grafana. Estas pruebas aisladas se distinguen del incidente ejecutado sobre Chatwoot real.
 
-La simulación se corrige a hasta 12 minutos de caída inducida, precedida por al menos 60 minutos de tráfico nominal constante a una solicitud por segundo. Se restaurará Rails en un bloque de recuperación y se documentará restauración manual ante interrupción abrupta. Se conserva PostgreSQL, Redis, volúmenes y estado Terraform. Seis minutos de caída en una hora completa producen aproximadamente 10 % de fallas, por debajo del 14.4 % requerido por el par rápido; no se promete una activación imposible con el procedimiento anterior.
+La simulación sobre Chatwoot se ejecutó con diez minutos nominales previos y una detención programada de Rails de 180 segundos, manteniendo el generador de tráfico activo. El procedimiento solicitó el arranque del mismo contenedor en su bloque de recuperación; se conservaron PostgreSQL, Redis, volúmenes y estado Terraform. Se verificaron la recuperación funcional, la activación de las alertas de disponibilidad y la entrega del aviso de resolución de la alerta urgente. El comportamiento observado corresponde al historial parcial y al volumen real de solicitudes completadas durante la prueba; no garantiza el mismo tiempo de activación con otro historial o carga.
 
-El informe incorporará fórmulas, consultas y política; sus capturas deberán identificar commit, tiempos, carga sintética y cobertura. Las evidencias aisladas no sustituyen la integración. El contraste con los PDF oficiales completos y la revisión conjunta de implementación siguen pendientes.
+El informe de entrega conserva las capturas y la cronología del incidente. Las evidencias aisladas con datos sintéticos no sustituyen esa validación de integración ni acreditan 30 días completos de cobertura.
 
 ## 10. Referencias
 
@@ -206,4 +204,4 @@ El informe incorporará fórmulas, consultas y política; sus capturas deberán 
 - [P1] Prometheus, histogramas: https://prometheus.io/docs/practices/histograms/
 - [P2] Prometheus, pruebas de reglas: https://prometheus.io/docs/prometheus/latest/configuration/unit_testing_rules/
 
-Referencia interna: `PLAN_TRABAJO_ENTREGA3_GRUPO7.md`, revisión 4, contrato técnico v3. La revisión actual sustituye las definiciones anteriores incompatibles sin afirmar cambios ya desplegados. Las reglas están en `observability/prometheus/rules/slo-recording.yml`; las pruebas en `observability/prometheus/tests/slo.test.yml`; su ejecución y las series resultantes se describen en `observability/validation/README.md`. La cobertura de la ventana se expresa mediante `unal_chatwoot:slo_history_coverage:ratio30d` y `unal_chatwoot:slo_window_complete:bool30d`, basadas en las evaluaciones válidas de la nueva instrumentación.
+Las reglas están en `observability/prometheus/rules/slo-recording.yml`; las pruebas en `observability/prometheus/tests/slo.test.yml`; su ejecución y las series resultantes se describen en `observability/validation/README.md`. La cobertura de la ventana se expresa mediante `unal_chatwoot:slo_history_coverage:ratio30d` y `unal_chatwoot:slo_window_complete:bool30d`, basadas en las evaluaciones válidas de la instrumentación.
