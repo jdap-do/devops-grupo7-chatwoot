@@ -1,5 +1,26 @@
 name: devops-grupo7-observability
 services:
+  alertmanager:
+    image: prom/alertmanager:v0.34.2
+    command: [--config.file=/etc/alertmanager/alertmanager.yml, --storage.path=/alertmanager]
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    ports:
+      - '127.0.0.1:9093:9093'
+    networks: [chatwoot]
+    restart: unless-stopped
+  notification-receiver:
+    build:
+      context: ./instrumentation
+      dockerfile: Dockerfile.receiver
+    image: devops-grupo7/notification-receiver:1
+    volumes:
+      - notifications_data:/data
+    ports:
+      - '127.0.0.1:3006:8080'
+    networks: [chatwoot]
+    restart: unless-stopped
   grafana:
     image: ${GRAFANA_IMAGE:-grafana/grafana:12.4.0}
     environment:
@@ -60,7 +81,7 @@ services:
     restart: unless-stopped
   http-gateway:
     build: ./instrumentation
-    image: devops-grupo7/http-gateway:contract-v1
+    image: devops-grupo7/http-gateway:contract-v3
     environment:
       UPSTREAM_URL: ${CHATWOOT_UPSTREAM_URL:-http://devops-grupo7-e2-rails:3000}
       PROJECT: devops-grupo7
@@ -78,6 +99,8 @@ networks:
 volumes:
   prometheus_data:
   grafana_data:
+  alertmanager_data:
+  notifications_data:
 secrets:
   grafana_admin_password:
     file: ./.runtime/grafana-admin-password.txt

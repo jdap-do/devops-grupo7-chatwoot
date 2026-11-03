@@ -1,0 +1,2171 @@
+rule_files:
+- ../rules/slo-alerts.yml
+evaluation_interval: 15s
+tests:
+- name: 'availability: fast pair fires immediately'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="1h"}
+    values: 15+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="5m"}
+    values: 15+0x40
+  alert_rule_test:
+  - eval_time: 15s
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: availability
+        severity: page
+      exp_annotations:
+        runbook_url: https://github.com/jdap-do/devops-grupo7-chatwoot/blob/david/entrega3-sre-alertas/observability/runbooks/http-unavailable.md
+        summary: Consumo acelerado del presupuesto de disponibilidad
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Pausar cambios no relacionados y revisar el servicio.
+  - eval_time: 15s
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 15s
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 15s
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 15s
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'availability: fast threshold is strict'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="1h"}
+    values: 14.4+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="5m"}
+    values: 14.4+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'availability: long window alone does not fire'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="1h"}
+    values: 15+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="5m"}
+    values: 14+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'availability: short window alone does not fire'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="1h"}
+    values: 14+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="5m"}
+    values: 15+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'availability: missing short window does not fire'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="1h"}
+    values: 100+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'availability: medium pair fires'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="6h"}
+    values: 7+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="30m"}
+    values: 7+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: availability
+        severity: page
+      exp_annotations:
+        runbook_url: https://github.com/jdap-do/devops-grupo7-chatwoot/blob/david/entrega3-sre-alertas/observability/runbooks/http-unavailable.md
+        summary: Consumo acelerado del presupuesto de disponibilidad
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Pausar cambios no relacionados y revisar el servicio.
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'availability: medium threshold is strict'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="6h"}
+    values: 6+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="30m"}
+    values: 6+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'availability: slow pair fires'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="3d"}
+    values: 1.1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="6h"}
+    values: 1.1+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: availability
+        severity: ticket
+      exp_annotations:
+        summary: Consumo sostenido del presupuesto de disponibilidad
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Programar revisión de confiabilidad y causas del consumo.
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'availability: slow threshold is strict'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="3d"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="6h"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'availability: slow long window alone does not fire'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="3d"}
+    values: 2+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="6h"}
+    values: 0.9+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'availability: two active page pairs produce a single alert'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="1h"}
+    values: 15+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="5m"}
+    values: 15+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="6h"}
+    values: 7+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="30m"}
+    values: 7+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: availability
+        severity: page
+      exp_annotations:
+        runbook_url: https://github.com/jdap-do/devops-grupo7-chatwoot/blob/david/entrega3-sre-alertas/observability/runbooks/http-unavailable.md
+        summary: Consumo acelerado del presupuesto de disponibilidad
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Pausar cambios no relacionados y revisar el servicio.
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'availability: page and ticket coexist for inhibition'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="1h"}
+    values: 15+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="5m"}
+    values: 15+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="6h"}
+    values: 7+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="30m"}
+    values: 7+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="3d"}
+    values: 7+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: availability
+        severity: page
+      exp_annotations:
+        runbook_url: https://github.com/jdap-do/devops-grupo7-chatwoot/blob/david/entrega3-sre-alertas/observability/runbooks/http-unavailable.md
+        summary: Consumo acelerado del presupuesto de disponibilidad
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Pausar cambios no relacionados y revisar el servicio.
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: availability
+        severity: ticket
+      exp_annotations:
+        summary: Consumo sostenido del presupuesto de disponibilidad
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Programar revisión de confiabilidad y causas del consumo.
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'availability: recovery resolves the page'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="1h"}
+    values: 15+0x4 0+0x35
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="5m"}
+    values: 15+0x4 0+0x35
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: availability
+        severity: page
+      exp_annotations:
+        runbook_url: https://github.com/jdap-do/devops-grupo7-chatwoot/blob/david/entrega3-sre-alertas/observability/runbooks/http-unavailable.md
+        summary: Consumo acelerado del presupuesto de disponibilidad
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Pausar cambios no relacionados y revisar el servicio.
+  - eval_time: 2m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+- name: 'latency: fast pair fires immediately'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="1h"}
+    values: 15+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="5m"}
+    values: 15+0x40
+  alert_rule_test:
+  - eval_time: 15s
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 15s
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 15s
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: latency
+        severity: page
+      exp_annotations:
+        summary: Consumo acelerado del presupuesto de latencia
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Pausar cambios no relacionados y revisar el servicio.
+  - eval_time: 15s
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 15s
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'latency: fast threshold is strict'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="1h"}
+    values: 14.4+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="5m"}
+    values: 14.4+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'latency: long window alone does not fire'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="1h"}
+    values: 15+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="5m"}
+    values: 14+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'latency: short window alone does not fire'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="1h"}
+    values: 14+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="5m"}
+    values: 15+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'latency: missing short window does not fire'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="1h"}
+    values: 100+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'latency: medium pair fires'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="6h"}
+    values: 7+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="30m"}
+    values: 7+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: latency
+        severity: page
+      exp_annotations:
+        summary: Consumo acelerado del presupuesto de latencia
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Pausar cambios no relacionados y revisar el servicio.
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'latency: medium threshold is strict'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="6h"}
+    values: 6+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="30m"}
+    values: 6+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'latency: slow pair fires'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="3d"}
+    values: 1.1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="6h"}
+    values: 1.1+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: latency
+        severity: ticket
+      exp_annotations:
+        summary: Consumo sostenido del presupuesto de latencia
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Programar revisión de confiabilidad y causas del consumo.
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'latency: slow threshold is strict'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="3d"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="6h"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'latency: slow long window alone does not fire'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="3d"}
+    values: 2+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="6h"}
+    values: 0.9+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'latency: two active page pairs produce a single alert'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="1h"}
+    values: 15+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="5m"}
+    values: 15+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="6h"}
+    values: 7+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="30m"}
+    values: 7+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: latency
+        severity: page
+      exp_annotations:
+        summary: Consumo acelerado del presupuesto de latencia
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Pausar cambios no relacionados y revisar el servicio.
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'latency: page and ticket coexist for inhibition'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="1h"}
+    values: 15+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="5m"}
+    values: 15+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="6h"}
+    values: 7+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="30m"}
+    values: 7+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="3d"}
+    values: 7+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: latency
+        severity: page
+      exp_annotations:
+        summary: Consumo acelerado del presupuesto de latencia
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Pausar cambios no relacionados y revisar el servicio.
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: latency
+        severity: ticket
+      exp_annotations:
+        summary: Consumo sostenido del presupuesto de latencia
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Programar revisión de confiabilidad y causas del consumo.
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: 'latency: recovery resolves the page'
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="1h"}
+    values: 15+0x4 0+0x35
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="5m"}
+    values: 15+0x4 0+0x35
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: latency
+        severity: page
+      exp_annotations:
+        summary: Consumo acelerado del presupuesto de latencia
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Pausar cambios no relacionados y revisar el servicio.
+  - eval_time: 2m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+- name: healthy telemetry without traffic does not fire
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: target down waits two minutes
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 0+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 1m45s
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: telemetry
+        severity: page
+      exp_annotations:
+        summary: Telemetría de Chatwoot incompleta o inaccesible
+        description: Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar los datos ausentes
+          como cumplimiento.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Revisar targets de Prometheus y las métricas del componente afectado.
+- name: healthy HTTP target without required metrics alerts
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: telemetry
+        severity: page
+      exp_annotations:
+        summary: Telemetría de Chatwoot incompleta o inaccesible
+        description: Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar los datos ausentes
+          como cumplimiento.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Revisar targets de Prometheus y las métricas del componente afectado.
+- name: missing job alerts even when other jobs are healthy
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: telemetry
+        severity: page
+      exp_annotations:
+        summary: Telemetría de Chatwoot incompleta o inaccesible
+        description: Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar los datos ausentes
+          como cumplimiento.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Revisar targets de Prometheus y las métricas del componente afectado.
+- name: missing dependency metric alerts
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: telemetry
+        severity: page
+      exp_annotations:
+        summary: Telemetría de Chatwoot incompleta o inaccesible
+        description: Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar los datos ausentes
+          como cumplimiento.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Revisar targets de Prometheus y las métricas del componente afectado.
+- name: missing resource metric alerts
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: telemetry
+        severity: page
+      exp_annotations:
+        summary: Telemetría de Chatwoot incompleta o inaccesible
+        description: Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar los datos ausentes
+          como cumplimiento.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Revisar targets de Prometheus y las métricas del componente afectado.
+- name: telemetry restoration resolves the alert
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 0+0x8 1+0x31
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 2m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: telemetry
+        severity: page
+      exp_annotations:
+        summary: Telemetría de Chatwoot incompleta o inaccesible
+        description: Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar los datos ausentes
+          como cumplimiento.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Revisar targets de Prometheus y las métricas del componente afectado.
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: another environment cannot trigger laboratory alerts
+  interval: 15s
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="other",slo="availability",window="1h"}
+    values: 100+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="other",slo="availability",window="5m"}
+    values: 100+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="other",slo="availability",window="6h"}
+    values: 100+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="other",slo="availability",window="30m"}
+    values: 100+0x40
+  - series: unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="other",slo="availability",window="3d"}
+    values: 100+0x40
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []

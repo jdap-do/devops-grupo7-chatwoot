@@ -1,6 +1,7 @@
 """Laboratory HTTP gateway. WebSocket traffic is outside the SLI contract."""
 import asyncio
 import os
+import re
 import time
 
 from aiohttp import ClientError, ClientSession, ClientTimeout, web
@@ -13,7 +14,9 @@ EXCLUDED = {"/metrics", "/health", "/healthz", "/readyz"}
 HOP_HEADERS = {"connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
                "te", "trailer", "transfer-encoding", "upgrade"}
 BUCKETS = (.05, .1, .25, .5, 1, 2.5, 5, 10, float("inf"))
-LABELS = ("project", "environment", "method", "status_class")
+LABELS = ("project", "environment", "method", "status_class", "availability_result")
+RESULTS = ("good", "bad", "excluded")
+READ_ROUTE = re.compile(r"^/api/v1/accounts/[0-9]+/(?:conversations(?:/search|/[0-9]+/messages)?|contacts)$")
 registry = CollectorRegistry()
 requests = Counter("unal_chatwoot_http_requests_total", "Completed eligible HTTP requests",
                    LABELS, registry=registry)
@@ -25,9 +28,18 @@ project = os.getenv("PROJECT", "devops-grupo7")
 environment = os.getenv("ENVIRONMENT", "lab")
 for method in METHODS:
     for status_class in CLASSES:
-        requests.labels(project, environment, method, status_class)
-        duration.labels(project, environment, method, status_class)
+        for result in RESULTS:
+            requests.labels(project, environment, method, status_class, result)
+            duration.labels(project, environment, method, status_class, result)
 active = in_flight.labels(project, environment)
+
+
+def classify(status, attribution="unknown"):
+    if 200 <= status < 300:
+        return "good"
+    if 300 <= status < 400 or (400 <= status < 500 and attribution == "client_confirmed"):
+        return "excluded"
+    return "bad"
 
 
 def headers_without_hops(headers):
@@ -39,7 +51,7 @@ def headers_without_hops(headers):
 async def proxy(request):
     if request.headers.get("Upgrade", "").lower() == "websocket":
         return web.Response(status=501, text="WebSocket is outside this laboratory gateway contract")
-    eligible = request.path not in EXCLUDED
+    eligible = request.method == "GET" and READ_ROUTE.fullmatch(request.path) is not None
     method = request.method if request.method in METHODS else "OTHER"
     started = time.monotonic()
     status = 502
@@ -66,8 +78,11 @@ async def proxy(request):
     finally:
         if eligible:
             status_class = f"{status // 100}xx" if 200 <= status < 600 else "5xx"
-            requests.labels(project, environment, method, status_class).inc()
-            duration.labels(project, environment, method, status_class).observe(time.monotonic() - started)
+            # No client-provided header may assert attribution. Without independently
+            # verified client responsibility, every 4xx is conservatively bad.
+            result = classify(status)
+            requests.labels(project, environment, method, status_class, result).inc()
+            duration.labels(project, environment, method, status_class, result).observe(time.monotonic() - started)
             active.dec()
 
 

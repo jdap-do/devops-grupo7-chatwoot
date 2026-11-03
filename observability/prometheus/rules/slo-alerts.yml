@@ -1,0 +1,120 @@
+# Burn-rate inputs already require positive denominators and valid HTTP telemetry.
+# No additional for duration is used for multiwindow SLO alerts.
+groups:
+- name: chatwoot-slo-alerts
+  interval: 15s
+  rules:
+  - alert: ChatwootAvailabilityBudgetBurn
+    expr: |-
+      max without (window) (
+        ((unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="1h"} > 14.4)
+         and on (project, environment, slo) (unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="5m"} > 14.4))
+        or
+        ((unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="6h"} > 6)
+         and on (project, environment, slo) (unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="30m"} > 6))
+      )
+    labels:
+      severity: page
+    annotations:
+      summary: Consumo acelerado del presupuesto de disponibilidad
+      runbook_url: https://github.com/jdap-do/devops-grupo7-chatwoot/blob/david/entrega3-sre-alertas/observability/runbooks/http-unavailable.md
+      description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto
+        restante.
+      dashboard_uid: chatwoot-sre-unal
+      next_action: Pausar cambios no relacionados y revisar el servicio.
+  - alert: ChatwootAvailabilityBudgetBurnSlow
+    expr: |-
+      max without (window) (
+        (unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="3d"} > 1)
+        and on (project, environment, slo) (unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="availability",window="6h"} > 1)
+      )
+    labels:
+      severity: ticket
+    annotations:
+      summary: Consumo sostenido del presupuesto de disponibilidad
+      description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto
+        restante.
+      dashboard_uid: chatwoot-sre-unal
+      next_action: Programar revisión de confiabilidad y causas del consumo.
+  - alert: ChatwootLatencyBudgetBurn
+    expr: |-
+      max without (window) (
+        ((unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="1h"} > 14.4)
+         and on (project, environment, slo) (unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="5m"} > 14.4))
+        or
+        ((unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="6h"} > 6)
+         and on (project, environment, slo) (unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="30m"} > 6))
+      )
+    labels:
+      severity: page
+    annotations:
+      summary: Consumo acelerado del presupuesto de latencia
+      description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto
+        restante.
+      dashboard_uid: chatwoot-sre-unal
+      next_action: Pausar cambios no relacionados y revisar el servicio.
+  - alert: ChatwootLatencyBudgetBurnSlow
+    expr: |-
+      max without (window) (
+        (unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="3d"} > 1)
+        and on (project, environment, slo) (unal_chatwoot:slo_burn_rate:ratio{project="devops-grupo7",environment="lab",slo="latency",window="6h"} > 1)
+      )
+    labels:
+      severity: ticket
+    annotations:
+      summary: Consumo sostenido del presupuesto de latencia
+      description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto
+        restante.
+      dashboard_uid: chatwoot-sre-unal
+      next_action: Programar revisión de confiabilidad y causas del consumo.
+  - alert: ChatwootTelemetryMissing
+    expr: |-
+      max by (project, environment) (
+        count by (project, environment) (up{project="devops-grupo7",environment="lab",job=~"chatwoot-http|chatwoot-dependencies|chatwoot-resources"} == 0)
+        or
+        absent(up{project="devops-grupo7",environment="lab",job="chatwoot-http"})
+        or
+        absent(up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies"})
+        or
+        absent(up{project="devops-grupo7",environment="lab",job="chatwoot-resources"})
+        or
+        absent(unal_chatwoot:http_telemetry_valid:ratio{project="devops-grupo7",environment="lab"})
+        or
+        absent(unal_dependency_probe_success{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",dependency="postgres"})
+        or
+        absent(unal_dependency_probes_total{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",dependency="postgres"})
+        or
+        absent(unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",dependency="postgres"})
+        or
+        absent(unal_dependency_probe_success{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",dependency="redis"})
+        or
+        absent(unal_dependency_probes_total{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",dependency="redis"})
+        or
+        absent(unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",dependency="redis"})
+        or
+        absent(unal_postgres_transactions_total{project="devops-grupo7",environment="lab",job="chatwoot-dependencies"})
+        or
+        absent(unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",job="chatwoot-dependencies"})
+        or
+        absent(unal_postgres_connections{project="devops-grupo7",environment="lab",job="chatwoot-dependencies"})
+        or
+        absent(unal_postgres_max_connections{project="devops-grupo7",environment="lab",job="chatwoot-dependencies"})
+        or
+        absent(unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",job="chatwoot-resources",component="rails"})
+        or
+        absent(unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",job="chatwoot-resources",component="sidekiq"})
+        or
+        absent(unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",job="chatwoot-resources",component="postgres"})
+        or
+        absent(unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",job="chatwoot-resources",component="redis"})
+      )
+    for: 2m
+    labels:
+      severity: page
+      slo: telemetry
+    annotations:
+      summary: Telemetría de Chatwoot incompleta o inaccesible
+      description: Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar
+        los datos ausentes como cumplimiento.
+      dashboard_uid: chatwoot-sre-unal
+      next_action: Revisar targets de Prometheus y las métricas del componente afectado.

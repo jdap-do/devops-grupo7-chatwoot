@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: chatwoot-sre-validation
+    orgId: 1
+    folder: VALIDACIÓN SINTÉTICA · Grupo 7
+    folderUid: chatwoot-synthetic-validation
+    type: file
+    disableDeletion: false
+    editable: false
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards

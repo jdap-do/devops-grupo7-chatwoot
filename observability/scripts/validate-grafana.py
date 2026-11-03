@@ -32,4 +32,4 @@ expected = {"chatwoot-http", "chatwoot-dependencies", "chatwoot-resources"}
 healthy = {value["metric"]["job"] for value in samples if float(value["value"][1]) == 1}
 assert expected <= healthy, healthy
 print("PASS: queries through Grafana reach all three Prometheus jobs")
-print("NOTE: final dashboard belongs to David and has not been created or validated here")
+print("NOTE: dashboard and SLO verification are performed by validate-integration.py")
