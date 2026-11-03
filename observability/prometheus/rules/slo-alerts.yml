@@ -17,6 +17,7 @@ groups:
       severity: page
     annotations:
       summary: Consumo acelerado del presupuesto de disponibilidad
+      runbook_url: https://github.com/jdap-do/devops-grupo7-chatwoot/blob/david/entrega3-sre-alertas/observability/runbooks/http-unavailable.md
       description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto
         restante.
       dashboard_uid: chatwoot-sre-unal
