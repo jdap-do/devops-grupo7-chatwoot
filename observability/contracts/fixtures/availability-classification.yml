@@ -1,0 +1,59 @@
+# Reference cases for the gateway classifier. These are not measurements from Chatwoot.
+# Attribution must come from the application or a verified request-validation contract.
+# A status code by itself does not prove client responsibility.
+contract_version: 3
+label: availability_result
+allowed_values: [good, bad, excluded]
+cases:
+  - name: successful_read
+    status_code: 200
+    attribution: success
+    expected: good
+  - name: redirect
+    status_code: 302
+    attribution: redirect
+    expected: excluded
+  - name: malformed_request_confirmed_by_validation
+    status_code: 400
+    attribution: client_confirmed
+    expected: excluded
+  - name: invalid_token_confirmed_by_authentication
+    status_code: 401
+    attribution: client_confirmed
+    expected: excluded
+  - name: authentication_rejected_by_server_misconfiguration
+    status_code: 401
+    attribution: service_failure
+    expected: bad
+  - name: missing_resource_confirmed_as_invalid_client_reference
+    status_code: 404
+    attribution: client_confirmed
+    expected: excluded
+  - name: unknown_cause_must_not_be_excluded
+    status_code: 400
+    attribution: unknown
+    expected: bad
+  - name: overload_rejects_legitimate_traffic
+    status_code: 429
+    attribution: service_overload
+    expected: bad
+  - name: unattributed_rate_limit
+    status_code: 429
+    attribution: unknown
+    expected: bad
+  - name: abusive_client_exceeds_explicit_quota
+    status_code: 429
+    attribution: client_confirmed
+    expected: excluded
+  - name: internal_failure
+    status_code: 500
+    attribution: service_failure
+    expected: bad
+  - name: dependency_failure
+    status_code: 503
+    attribution: service_failure
+    expected: bad
+  - name: upstream_timeout
+    status_code: 504
+    attribution: service_failure
+    expected: bad
