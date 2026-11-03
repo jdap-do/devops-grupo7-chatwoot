@@ -1,0 +1,19 @@
+{
+  "synthetic": true,
+  "dashboardUid": "chatwoot-sre-unal",
+  "dashboardSha256": "8e20b62e4e7388ee64ea16b279216f1979c7a573e332921165ffb985e3f19d4c",
+  "panels": 29,
+  "queries": 28,
+  "checks": [
+    "Importación, datasource, todas las consultas y cobertura parcial",
+    "Visualización inicial con historial parcial",
+    "Degradación con 4xx bad, p95 superior al umbral y presupuesto negativo",
+    "Endpoint accesible sin métricas: SLO no evaluable y telemetría incompleta",
+    "Memoria observada sin límite: estado explícito y ausencia de porcentaje ficticio",
+    "Dependencias sin métricas: ausencia de datos y no éxito artificial"
+  ],
+  "browser": "Microsoft Edge / Playwright 1.56.1",
+  "grafana": "13.2.5",
+  "prometheus": "3.13.5",
+  "completedAt": "2026-11-02T23:19:14.949Z"
+}
