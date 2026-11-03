@@ -10,8 +10,15 @@ from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram, gene
 from prometheus_client.exposition import CONTENT_TYPE_LATEST
 
 BUCKETS = (0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10)
-SCENARIOS = ("healthy", "degraded", "telemetry_missing", "no_memory_limit", "dependencies_missing")
+SCENARIOS = ("healthy", "degraded", "telemetry_missing", "no_memory_limit", "dependencies_missing",
+             "availability_failure", "latency_failure", "recovery")
 REQUESTS_PER_TICK = 10
+# Logical observations only: these scenarios never send traffic to Chatwoot.
+ALERT_SCENARIOS = {
+    "availability_failure": (1000, "4xx", "bad", 0.02),
+    "latency_failure": (10000, "2xx", "good", 1.0),
+    "recovery": (10000, "2xx", "good", 0.15),
+}
 PROBE_INTERVAL_SECONDS = 15
 COMPONENTS = ("rails", "sidekiq", "postgres", "redis")
 MEMORY_LIMITS = (1024, 512, 1024, 256)
@@ -67,12 +74,15 @@ class SyntheticTelemetry:
         with self.lock:
             degraded = self.scenario == "degraded"
             self.ticks += 1
-            for _ in range(REQUESTS_PER_TICK):
+            profile = ALERT_SCENARIOS.get(self.scenario)
+            for _ in range(profile[0] if profile else REQUESTS_PER_TICK):
                 self.sequence += 1
                 if self.scenario == "telemetry_missing":
                     continue
                 position = self.sequence % 10
-                if degraded and position in (0, 1):
+                if profile:
+                    _, status, result, duration = profile
+                elif degraded and position in (0, 1):
                     status, result, duration = "4xx", "bad", 0.02
                 elif degraded and position == 2:
                     status, result, duration = "5xx", "bad", 0.03

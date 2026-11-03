@@ -1,0 +1,561 @@
+rule_files:
+- ../rules/slo-recording.yml
+- ../rules/slo-alerts.yml
+evaluation_interval: 15s
+fuzzy_compare: true
+group_eval_order:
+- chatwoot-slo-recording
+- chatwoot-slo-alerts
+tests:
+- name: zero traffic is not 100 percent availability
+  interval: 1m
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a"}
+    values: 1+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.05"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.1"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.25"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.5"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="1"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="2.5"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="5"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="10"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="+Inf"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded"}
+    values: 0+0x20
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: only client errors and redirects are not evaluable
+  interval: 1m
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a"}
+    values: 1+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.05"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.1"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.25"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.5"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="1"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="2.5"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="5"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="10"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="+Inf"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded",le="0.05"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded",le="0.1"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded",le="0.25"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded",le="0.5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded",le="1"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded",le="2.5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded",le="5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded",le="10"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded",le="+Inf"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded",le="0.05"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded",le="0.1"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded",le="0.25"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded",le="0.5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded",le="1"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded",le="2.5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded",le="5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded",le="10"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded",le="+Inf"}
+    values: 0+100x20
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: only overload responses give zero availability and no successful latency
+  interval: 1m
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a"}
+    values: 1+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.05"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.1"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.25"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.5"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="1"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="2.5"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="5"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="10"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="+Inf"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad",le="0.05"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad",le="0.1"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad",le="0.25"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad",le="0.5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad",le="1"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad",le="2.5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad",le="5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad",le="10"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad",le="+Inf"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded"}
+    values: 0+0x20
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: availability
+        severity: page
+      exp_annotations:
+        summary: Consumo acelerado del presupuesto de disponibilidad
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Pausar cambios no relacionados y revisar el servicio.
+  - eval_time: 5m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: availability
+        severity: ticket
+      exp_annotations:
+        summary: Consumo sostenido del presupuesto de disponibilidad
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Programar revisión de confiabilidad y causas del consumo.
+  - eval_time: 5m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: fast failures cannot improve successful latency
+  interval: 1m
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a"}
+    values: 1+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.05"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.1"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.25"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.5"}
+    values: 0+90x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="1"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="2.5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="10"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="+Inf"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad",le="0.05"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad",le="0.1"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad",le="0.25"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad",le="0.5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad",le="1"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad",le="2.5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad",le="5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad",le="10"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="5xx",availability_result="bad",le="+Inf"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="bad"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded"}
+    values: 0+0x20
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: availability
+        severity: page
+      exp_annotations:
+        summary: Consumo acelerado del presupuesto de disponibilidad
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Pausar cambios no relacionados y revisar el servicio.
+  - eval_time: 5m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: availability
+        severity: ticket
+      exp_annotations:
+        summary: Consumo sostenido del presupuesto de disponibilidad
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Programar revisión de confiabilidad y causas del consumo.
+  - eval_time: 5m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: latency
+        severity: ticket
+      exp_annotations:
+        summary: Consumo sostenido del presupuesto de latencia
+        description: Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Programar revisión de confiabilidad y causas del consumo.
+  - eval_time: 5m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts: []
+- name: healthy target without bad counters cannot become 100 percent
+  interval: 1m
+  input_series:
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a"}
+    values: 1+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_count{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.05"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.1"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.25"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="0.5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="1"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="2.5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="5"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="10"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_request_duration_seconds_bucket{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="2xx",availability_result="good",le="+Inf"}
+    values: 0+100x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="4xx",availability_result="excluded"}
+    values: 0+0x20
+  - series: unal_chatwoot_http_requests_total{project="devops-grupo7",environment="lab",job="chatwoot-http",instance="gateway-a",method="GET",status_class="3xx",availability_result="excluded"}
+    values: 0+0x20
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-dependencies",instance="fixture"}
+    values: 1+0x40
+  - series: up{project="devops-grupo7",environment="lab",job="chatwoot-resources",instance="fixture"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="postgres"}
+    values: 1+0x40
+  - series: unal_dependency_probe_success{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probes_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_dependency_probe_duration_seconds_count{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies",dependency="redis"}
+    values: 1+0x40
+  - series: unal_postgres_transactions_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_redis_commands_processed_total{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_postgres_max_connections{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-dependencies"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="rails"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="sidekiq"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="postgres"}
+    values: 1+0x40
+  - series: unal_container_memory_working_set_bytes{project="devops-grupo7",environment="lab",instance="fixture",job="chatwoot-resources",component="redis"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ChatwootAvailabilityBudgetBurn
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootAvailabilityBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootLatencyBudgetBurn
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootLatencyBudgetBurnSlow
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: ChatwootTelemetryMissing
+    exp_alerts:
+    - exp_labels:
+        project: devops-grupo7
+        environment: lab
+        slo: telemetry
+        severity: page
+      exp_annotations:
+        summary: Telemetría de Chatwoot incompleta o inaccesible
+        description: Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar los datos ausentes
+          como cumplimiento.
+        dashboard_uid: chatwoot-sre-unal
+        next_action: Revisar targets de Prometheus y las métricas del componente afectado.

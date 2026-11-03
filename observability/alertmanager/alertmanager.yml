@@ -1,0 +1,18 @@
+# Local synthetic validation receiver. Replace the receiver for a real deployment.
+route:
+  receiver: local-webhook
+  group_by: [project, environment, slo]
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 4h
+
+inhibit_rules:
+  - source_matchers: ['severity="page"']
+    target_matchers: ['severity="ticket"']
+    equal: [project, environment, slo]
+
+receivers:
+  - name: local-webhook
+    webhook_configs:
+      - url: http://notification-receiver:8080/alerts
+        send_resolved: true

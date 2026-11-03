@@ -15,14 +15,14 @@ if (($versionOutput -join "`n") -notmatch '(?m)^promtool, version 3\.13\.5\b') {
 
 Push-Location -LiteralPath (Split-Path -Parent $PSScriptRoot)
 try {
-    & $promtoolCommand check rules 'prometheus/rules/slo-recording.yml'
+    & $promtoolCommand check rules 'prometheus/rules/slo-recording.yml' 'prometheus/rules/slo-alerts.yml'
     if ($LASTEXITCODE -ne 0) {
-        throw 'La configuracion de recording rules no es valida.'
+        throw 'La configuracion de reglas de Prometheus no es valida.'
     }
 
-    & $promtoolCommand test rules 'prometheus/tests/slo.test.yml'
+    & $promtoolCommand test rules 'prometheus/tests/slo.test.yml' 'prometheus/tests/slo-alerts.test.yml' 'prometheus/tests/slo-alerts.integration.test.yml'
     if ($LASTEXITCODE -ne 0) {
-        throw 'Las pruebas de SLO no finalizaron correctamente.'
+        throw 'Las pruebas de SLO y alertas no finalizaron correctamente.'
     }
 }
 finally {

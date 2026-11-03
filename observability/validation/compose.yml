@@ -1,6 +1,33 @@
 name: devops-grupo7-sre-validation
 
 services:
+  notification-receiver:
+    image: devops-grupo7/notification-receiver:contract-v3
+    build:
+      context: ./notification-receiver
+    ports:
+      - "127.0.0.1:${VALIDATION_RECEIVER_PORT:-18093}:8080"
+    volumes:
+      - notifications-data:/data
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  alertmanager:
+    image: prom/alertmanager:v0.34.2
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+    ports:
+      - "127.0.0.1:${VALIDATION_ALERTMANAGER_PORT:-19093}:9093"
+    volumes:
+      - ../alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    depends_on:
+      - notification-receiver
+
   synthetic-metrics:
     image: devops-grupo7/synthetic-metrics:contract-v3
     build:
@@ -27,6 +54,7 @@ services:
       - prometheus-data:/prometheus
     depends_on:
       - synthetic-metrics
+      - alertmanager
 
   grafana:
     image: grafana/grafana:13.2.5
@@ -48,5 +76,7 @@ services:
       - prometheus
 
 volumes:
+  alertmanager-data:
+  notifications-data:
   prometheus-data:
   grafana-data:

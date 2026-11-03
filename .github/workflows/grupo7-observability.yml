@@ -1,0 +1,80 @@
+name: Group 7 - Observability Validation
+
+on:
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - 'observability/**'
+      - '.github/workflows/grupo7-observability.yml'
+  push:
+    branches: [develop, main]
+    paths:
+      - 'observability/**'
+      - '.github/workflows/grupo7-observability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: grupo7-observability-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-observability:
+    name: Validate SLOs, alerts and observability configuration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PROMETHEUS_IMAGE: prom/prometheus:v3.13.5
+      ALERTMANAGER_IMAGE: prom/alertmanager:v0.34.2
+      ACTIONLINT_IMAGE: rhysd/actionlint:1.7.7
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install YAML parser
+        run: python -m pip install PyYAML==6.0.3
+
+      - name: Validate YAML and dashboard contract
+        run: |
+          python observability/validation/validate-config.py \
+            --dashboard-rules "$RUNNER_TEMP/dashboard-rules.yml"
+
+      - name: Validate workflow syntax
+        run: |
+          docker run --rm --network none \
+            --mount "type=bind,source=$PWD,target=/workspace,readonly" \
+            --workdir /workspace \
+            "$ACTIONLINT_IMAGE" -color .github/workflows/grupo7-observability.yml
+
+      - name: Check Prometheus configuration and rules
+        run: |
+          docker run --rm --network none --entrypoint /bin/promtool \
+            --mount "type=bind,source=$PWD/observability/validation/prometheus.yml,target=/etc/prometheus/prometheus.yml,readonly" \
+            --mount "type=bind,source=$PWD/observability/prometheus/rules,target=/etc/prometheus/rules,readonly" \
+            "$PROMETHEUS_IMAGE" check config /etc/prometheus/prometheus.yml
+
+      - name: Test SLI, SLO and burn rate rules
+        run: |
+          docker run --rm --network none --entrypoint /bin/promtool \
+            --mount "type=bind,source=$PWD,target=/workspace,readonly" \
+            --workdir /workspace \
+            "$PROMETHEUS_IMAGE" test rules observability/prometheus/tests/*.yml
+
+      - name: Check dashboard PromQL queries
+        run: |
+          docker run --rm --network none --entrypoint /bin/promtool \
+            --mount "type=bind,source=$RUNNER_TEMP/dashboard-rules.yml,target=/tmp/dashboard-rules.yml,readonly" \
+            "$PROMETHEUS_IMAGE" check rules /tmp/dashboard-rules.yml
+
+      - name: Validate Alertmanager configuration
+        run: |
+          docker run --rm --network none --entrypoint /bin/amtool \
+            --mount "type=bind,source=$PWD/observability/alertmanager,target=/etc/alertmanager,readonly" \
+            "$ALERTMANAGER_IMAGE" check-config /etc/alertmanager/alertmanager.yml
+
+      - name: Validate isolated Compose configuration
+        run: docker compose -f observability/validation/compose.yml config --quiet

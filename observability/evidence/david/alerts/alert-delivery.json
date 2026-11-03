@@ -1,0 +1,589 @@
+{
+  "synthetic": true,
+  "started_at": "2026-11-02T23:42:21.555707+00:00",
+  "checks": [
+    {
+      "check": "initial pages inactive",
+      "at": "2026-11-02T23:42:21.637196+00:00",
+      "evidence": true
+    },
+    {
+      "check": "ChatwootAvailabilityBudgetBurn firing",
+      "at": "2026-11-02T23:43:00.824903+00:00",
+      "evidence": [
+        {
+          "labels": {
+            "alertname": "ChatwootAvailabilityBudgetBurn",
+            "environment": "lab",
+            "project": "devops-grupo7",
+            "severity": "page",
+            "slo": "availability"
+          },
+          "annotations": {
+            "dashboard_uid": "chatwoot-sre-unal",
+            "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.",
+            "next_action": "Pausar cambios no relacionados y revisar el servicio.",
+            "summary": "Consumo acelerado del presupuesto de disponibilidad"
+          },
+          "state": "firing",
+          "activeAt": "2026-11-02T23:42:42.856728006Z",
+          "value": "2.9361042513411082e+01"
+        }
+      ]
+    },
+    {
+      "check": "ChatwootAvailabilityBudgetBurn webhook firing",
+      "at": "2026-11-02T23:43:09.873642+00:00",
+      "evidence": [
+        {
+          "id": 2,
+          "received_at": "2026-11-02T23:43:07.863714+00:00",
+          "payload": {
+            "receiver": "local-webhook",
+            "status": "firing",
+            "alerts": [
+              {
+                "status": "firing",
+                "labels": {
+                  "alertname": "ChatwootAvailabilityBudgetBurn",
+                  "environment": "lab",
+                  "project": "devops-grupo7",
+                  "severity": "page",
+                  "slo": "availability"
+                },
+                "annotations": {
+                  "dashboard_uid": "chatwoot-sre-unal",
+                  "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.",
+                  "next_action": "Pausar cambios no relacionados y revisar el servicio.",
+                  "summary": "Consumo acelerado del presupuesto de disponibilidad"
+                },
+                "startsAt": "2026-11-02T23:42:42.856Z",
+                "endsAt": "0001-01-01T00:00:00Z",
+                "generatorURL": "http://a24a69f46d3b:9090/graph?g0.expr=max+without+%28window%29+%28%28%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22availability%22%2Cwindow%3D%221h%22%7D+%3E+14.4%29+and+on+%28project%2C+environment%2C+slo%29+%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22availability%22%2Cwindow%3D%225m%22%7D+%3E+14.4%29%29+or+%28%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22availability%22%2Cwindow%3D%226h%22%7D+%3E+6%29+and+on+%28project%2C+environment%2C+slo%29+%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22availability%22%2Cwindow%3D%2230m%22%7D+%3E+6%29%29%29&g0.tab=1",
+                "fingerprint": "820e5bed3e6c3116"
+              }
+            ],
+            "notification_reason": "new alerts added",
+            "groupLabels": {
+              "environment": "lab",
+              "project": "devops-grupo7",
+              "slo": "availability"
+            },
+            "commonLabels": {
+              "alertname": "ChatwootAvailabilityBudgetBurn",
+              "environment": "lab",
+              "project": "devops-grupo7",
+              "severity": "page",
+              "slo": "availability"
+            },
+            "commonAnnotations": {
+              "dashboard_uid": "chatwoot-sre-unal",
+              "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.",
+              "next_action": "Pausar cambios no relacionados y revisar el servicio.",
+              "summary": "Consumo acelerado del presupuesto de disponibilidad"
+            },
+            "routeLabels": {},
+            "externalURL": "http://563536d75a3b:9093",
+            "version": "4",
+            "groupKey": "{}:{environment=\"lab\", project=\"devops-grupo7\", slo=\"availability\"}",
+            "truncatedAlerts": 0
+          }
+        }
+      ]
+    },
+    {
+      "check": "ChatwootAvailabilityBudgetBurn inhibits ticket",
+      "at": "2026-11-02T23:43:09.877875+00:00",
+      "evidence": [
+        {
+          "annotations": {
+            "dashboard_uid": "chatwoot-sre-unal",
+            "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.",
+            "next_action": "Programar revisión de confiabilidad y causas del consumo.",
+            "summary": "Consumo sostenido del presupuesto de disponibilidad"
+          },
+          "endsAt": "2026-11-02T23:46:42.856Z",
+          "fingerprint": "4443ea458ffdf45c",
+          "receivers": [
+            {
+              "name": "local-webhook"
+            }
+          ],
+          "startsAt": "2026-11-02T23:41:27.856Z",
+          "status": {
+            "inhibitedBy": [
+              "820e5bed3e6c3116"
+            ],
+            "mutedBy": [],
+            "silencedBy": [],
+            "state": "suppressed"
+          },
+          "updatedAt": "2026-11-02T23:42:57.855Z",
+          "generatorURL": "http://a24a69f46d3b:9090/graph?g0.expr=max+without+%28window%29+%28%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22availability%22%2Cwindow%3D%223d%22%7D+%3E+1%29+and+on+%28project%2C+environment%2C+slo%29+%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22availability%22%2Cwindow%3D%226h%22%7D+%3E+1%29%29&g0.tab=1",
+          "labels": {
+            "alertname": "ChatwootAvailabilityBudgetBurnSlow",
+            "environment": "lab",
+            "project": "devops-grupo7",
+            "severity": "ticket",
+            "slo": "availability"
+          }
+        }
+      ]
+    },
+    {
+      "check": "ChatwootAvailabilityBudgetBurn inactive",
+      "at": "2026-11-02T23:44:58.420868+00:00",
+      "evidence": true
+    },
+    {
+      "check": "ChatwootAvailabilityBudgetBurn webhook resolved",
+      "at": "2026-11-02T23:45:10.487676+00:00",
+      "evidence": [
+        {
+          "id": 3,
+          "received_at": "2026-11-02T23:45:07.858060+00:00",
+          "payload": {
+            "receiver": "local-webhook",
+            "status": "firing",
+            "alerts": [
+              {
+                "status": "resolved",
+                "labels": {
+                  "alertname": "ChatwootAvailabilityBudgetBurn",
+                  "environment": "lab",
+                  "project": "devops-grupo7",
+                  "severity": "page",
+                  "slo": "availability"
+                },
+                "annotations": {
+                  "dashboard_uid": "chatwoot-sre-unal",
+                  "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.",
+                  "next_action": "Pausar cambios no relacionados y revisar el servicio.",
+                  "summary": "Consumo acelerado del presupuesto de disponibilidad"
+                },
+                "startsAt": "2026-11-02T23:42:42.856Z",
+                "endsAt": "2026-11-02T23:44:42.856Z",
+                "generatorURL": "http://a24a69f46d3b:9090/graph?g0.expr=max+without+%28window%29+%28%28%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22availability%22%2Cwindow%3D%221h%22%7D+%3E+14.4%29+and+on+%28project%2C+environment%2C+slo%29+%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22availability%22%2Cwindow%3D%225m%22%7D+%3E+14.4%29%29+or+%28%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22availability%22%2Cwindow%3D%226h%22%7D+%3E+6%29+and+on+%28project%2C+environment%2C+slo%29+%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22availability%22%2Cwindow%3D%2230m%22%7D+%3E+6%29%29%29&g0.tab=1",
+                "fingerprint": "820e5bed3e6c3116"
+              },
+              {
+                "status": "firing",
+                "labels": {
+                  "alertname": "ChatwootAvailabilityBudgetBurnSlow",
+                  "environment": "lab",
+                  "project": "devops-grupo7",
+                  "severity": "ticket",
+                  "slo": "availability"
+                },
+                "annotations": {
+                  "dashboard_uid": "chatwoot-sre-unal",
+                  "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.",
+                  "next_action": "Programar revisión de confiabilidad y causas del consumo.",
+                  "summary": "Consumo sostenido del presupuesto de disponibilidad"
+                },
+                "startsAt": "2026-11-02T23:41:27.856Z",
+                "endsAt": "0001-01-01T00:00:00Z",
+                "generatorURL": "http://a24a69f46d3b:9090/graph?g0.expr=max+without+%28window%29+%28%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22availability%22%2Cwindow%3D%223d%22%7D+%3E+1%29+and+on+%28project%2C+environment%2C+slo%29+%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22availability%22%2Cwindow%3D%226h%22%7D+%3E+1%29%29&g0.tab=1",
+                "fingerprint": "4443ea458ffdf45c"
+              }
+            ],
+            "notification_reason": "new alerts added",
+            "groupLabels": {
+              "environment": "lab",
+              "project": "devops-grupo7",
+              "slo": "availability"
+            },
+            "commonLabels": {
+              "environment": "lab",
+              "project": "devops-grupo7",
+              "slo": "availability"
+            },
+            "commonAnnotations": {
+              "dashboard_uid": "chatwoot-sre-unal",
+              "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante."
+            },
+            "routeLabels": {},
+            "externalURL": "http://563536d75a3b:9093",
+            "version": "4",
+            "groupKey": "{}:{environment=\"lab\", project=\"devops-grupo7\", slo=\"availability\"}",
+            "truncatedAlerts": 0
+          }
+        }
+      ]
+    },
+    {
+      "check": "ChatwootLatencyBudgetBurn firing",
+      "at": "2026-11-02T23:46:43.921814+00:00",
+      "evidence": [
+        {
+          "labels": {
+            "alertname": "ChatwootLatencyBudgetBurn",
+            "environment": "lab",
+            "project": "devops-grupo7",
+            "severity": "page",
+            "slo": "latency"
+          },
+          "annotations": {
+            "dashboard_uid": "chatwoot-sre-unal",
+            "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.",
+            "next_action": "Pausar cambios no relacionados y revisar el servicio.",
+            "summary": "Consumo acelerado del presupuesto de latencia"
+          },
+          "state": "firing",
+          "activeAt": "2026-11-02T23:46:27.856728006Z",
+          "value": "6.939754988185169e+00"
+        }
+      ]
+    },
+    {
+      "check": "ChatwootLatencyBudgetBurn webhook firing",
+      "at": "2026-11-02T23:46:59.009294+00:00",
+      "evidence": [
+        {
+          "id": 5,
+          "received_at": "2026-11-02T23:46:57.844760+00:00",
+          "payload": {
+            "receiver": "local-webhook",
+            "status": "firing",
+            "alerts": [
+              {
+                "status": "firing",
+                "labels": {
+                  "alertname": "ChatwootLatencyBudgetBurn",
+                  "environment": "lab",
+                  "project": "devops-grupo7",
+                  "severity": "page",
+                  "slo": "latency"
+                },
+                "annotations": {
+                  "dashboard_uid": "chatwoot-sre-unal",
+                  "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.",
+                  "next_action": "Pausar cambios no relacionados y revisar el servicio.",
+                  "summary": "Consumo acelerado del presupuesto de latencia"
+                },
+                "startsAt": "2026-11-02T23:46:27.856Z",
+                "endsAt": "0001-01-01T00:00:00Z",
+                "generatorURL": "http://a24a69f46d3b:9090/graph?g0.expr=max+without+%28window%29+%28%28%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22latency%22%2Cwindow%3D%221h%22%7D+%3E+14.4%29+and+on+%28project%2C+environment%2C+slo%29+%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22latency%22%2Cwindow%3D%225m%22%7D+%3E+14.4%29%29+or+%28%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22latency%22%2Cwindow%3D%226h%22%7D+%3E+6%29+and+on+%28project%2C+environment%2C+slo%29+%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22latency%22%2Cwindow%3D%2230m%22%7D+%3E+6%29%29%29&g0.tab=1",
+                "fingerprint": "cfc0745500400956"
+              }
+            ],
+            "notification_reason": "new alerts added",
+            "groupLabels": {
+              "environment": "lab",
+              "project": "devops-grupo7",
+              "slo": "latency"
+            },
+            "commonLabels": {
+              "alertname": "ChatwootLatencyBudgetBurn",
+              "environment": "lab",
+              "project": "devops-grupo7",
+              "severity": "page",
+              "slo": "latency"
+            },
+            "commonAnnotations": {
+              "dashboard_uid": "chatwoot-sre-unal",
+              "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.",
+              "next_action": "Pausar cambios no relacionados y revisar el servicio.",
+              "summary": "Consumo acelerado del presupuesto de latencia"
+            },
+            "routeLabels": {},
+            "externalURL": "http://563536d75a3b:9093",
+            "version": "4",
+            "groupKey": "{}:{environment=\"lab\", project=\"devops-grupo7\", slo=\"latency\"}",
+            "truncatedAlerts": 0
+          }
+        }
+      ]
+    },
+    {
+      "check": "ChatwootLatencyBudgetBurn inhibits ticket",
+      "at": "2026-11-02T23:46:59.013772+00:00",
+      "evidence": [
+        {
+          "annotations": {
+            "dashboard_uid": "chatwoot-sre-unal",
+            "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.",
+            "next_action": "Programar revisión de confiabilidad y causas del consumo.",
+            "summary": "Consumo sostenido del presupuesto de latencia"
+          },
+          "endsAt": "2026-11-02T23:49:42.856Z",
+          "fingerprint": "b6f0d247033f3ce4",
+          "receivers": [
+            {
+              "name": "local-webhook"
+            }
+          ],
+          "startsAt": "2026-11-02T23:45:42.856Z",
+          "status": {
+            "inhibitedBy": [
+              "cfc0745500400956"
+            ],
+            "mutedBy": [],
+            "silencedBy": [],
+            "state": "suppressed"
+          },
+          "updatedAt": "2026-11-02T23:45:57.842Z",
+          "generatorURL": "http://a24a69f46d3b:9090/graph?g0.expr=max+without+%28window%29+%28%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22latency%22%2Cwindow%3D%223d%22%7D+%3E+1%29+and+on+%28project%2C+environment%2C+slo%29+%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22latency%22%2Cwindow%3D%226h%22%7D+%3E+1%29%29&g0.tab=1",
+          "labels": {
+            "alertname": "ChatwootLatencyBudgetBurnSlow",
+            "environment": "lab",
+            "project": "devops-grupo7",
+            "severity": "ticket",
+            "slo": "latency"
+          }
+        }
+      ]
+    },
+    {
+      "check": "ChatwootLatencyBudgetBurn inactive",
+      "at": "2026-11-02T23:49:44.945013+00:00",
+      "evidence": true
+    },
+    {
+      "check": "ChatwootLatencyBudgetBurn webhook resolved",
+      "at": "2026-11-02T23:50:00.052383+00:00",
+      "evidence": [
+        {
+          "id": 6,
+          "received_at": "2026-11-02T23:49:57.836906+00:00",
+          "payload": {
+            "receiver": "local-webhook",
+            "status": "firing",
+            "alerts": [
+              {
+                "status": "resolved",
+                "labels": {
+                  "alertname": "ChatwootLatencyBudgetBurn",
+                  "environment": "lab",
+                  "project": "devops-grupo7",
+                  "severity": "page",
+                  "slo": "latency"
+                },
+                "annotations": {
+                  "dashboard_uid": "chatwoot-sre-unal",
+                  "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.",
+                  "next_action": "Pausar cambios no relacionados y revisar el servicio.",
+                  "summary": "Consumo acelerado del presupuesto de latencia"
+                },
+                "startsAt": "2026-11-02T23:46:27.856Z",
+                "endsAt": "2026-11-02T23:49:27.856Z",
+                "generatorURL": "http://a24a69f46d3b:9090/graph?g0.expr=max+without+%28window%29+%28%28%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22latency%22%2Cwindow%3D%221h%22%7D+%3E+14.4%29+and+on+%28project%2C+environment%2C+slo%29+%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22latency%22%2Cwindow%3D%225m%22%7D+%3E+14.4%29%29+or+%28%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22latency%22%2Cwindow%3D%226h%22%7D+%3E+6%29+and+on+%28project%2C+environment%2C+slo%29+%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22latency%22%2Cwindow%3D%2230m%22%7D+%3E+6%29%29%29&g0.tab=1",
+                "fingerprint": "cfc0745500400956"
+              },
+              {
+                "status": "firing",
+                "labels": {
+                  "alertname": "ChatwootLatencyBudgetBurnSlow",
+                  "environment": "lab",
+                  "project": "devops-grupo7",
+                  "severity": "ticket",
+                  "slo": "latency"
+                },
+                "annotations": {
+                  "dashboard_uid": "chatwoot-sre-unal",
+                  "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante.",
+                  "next_action": "Programar revisión de confiabilidad y causas del consumo.",
+                  "summary": "Consumo sostenido del presupuesto de latencia"
+                },
+                "startsAt": "2026-11-02T23:45:42.856Z",
+                "endsAt": "0001-01-01T00:00:00Z",
+                "generatorURL": "http://a24a69f46d3b:9090/graph?g0.expr=max+without+%28window%29+%28%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22latency%22%2Cwindow%3D%223d%22%7D+%3E+1%29+and+on+%28project%2C+environment%2C+slo%29+%28unal_chatwoot%3Aslo_burn_rate%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%2Cslo%3D%22latency%22%2Cwindow%3D%226h%22%7D+%3E+1%29%29&g0.tab=1",
+                "fingerprint": "b6f0d247033f3ce4"
+              }
+            ],
+            "notification_reason": "new alerts added",
+            "groupLabels": {
+              "environment": "lab",
+              "project": "devops-grupo7",
+              "slo": "latency"
+            },
+            "commonLabels": {
+              "environment": "lab",
+              "project": "devops-grupo7",
+              "slo": "latency"
+            },
+            "commonAnnotations": {
+              "dashboard_uid": "chatwoot-sre-unal",
+              "description": "Ambas ventanas del par superan su burn rate. Revisar el impacto, los eventos elegibles y el presupuesto restante."
+            },
+            "routeLabels": {},
+            "externalURL": "http://563536d75a3b:9093",
+            "version": "4",
+            "groupKey": "{}:{environment=\"lab\", project=\"devops-grupo7\", slo=\"latency\"}",
+            "truncatedAlerts": 0
+          }
+        }
+      ]
+    },
+    {
+      "check": "HTTP endpoint up despite missing metrics",
+      "at": "2026-11-02T23:50:27.168411+00:00",
+      "evidence": [
+        {
+          "metric": {
+            "__name__": "up",
+            "environment": "lab",
+            "instance": "synthetic-metrics:8000",
+            "job": "chatwoot-http",
+            "project": "devops-grupo7"
+          },
+          "value": [
+            1793663427.163,
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "check": "ChatwootTelemetryMissing firing after 2m",
+      "at": "2026-11-02T23:52:27.897790+00:00",
+      "evidence": [
+        {
+          "labels": {
+            "alertname": "ChatwootTelemetryMissing",
+            "environment": "lab",
+            "project": "devops-grupo7",
+            "severity": "page",
+            "slo": "telemetry"
+          },
+          "annotations": {
+            "dashboard_uid": "chatwoot-sre-unal",
+            "description": "Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar los datos ausentes como cumplimiento.",
+            "next_action": "Revisar targets de Prometheus y las métricas del componente afectado.",
+            "summary": "Telemetría de Chatwoot incompleta o inaccesible"
+          },
+          "state": "firing",
+          "activeAt": "2026-11-02T23:50:12.856728006Z",
+          "value": "1e+00"
+        }
+      ]
+    },
+    {
+      "check": "ChatwootTelemetryMissing webhook firing",
+      "at": "2026-11-02T23:52:27.902532+00:00",
+      "evidence": [
+        {
+          "id": 9,
+          "received_at": "2026-11-02T23:52:27.820169+00:00",
+          "payload": {
+            "receiver": "local-webhook",
+            "status": "firing",
+            "alerts": [
+              {
+                "status": "firing",
+                "labels": {
+                  "alertname": "ChatwootTelemetryMissing",
+                  "environment": "lab",
+                  "project": "devops-grupo7",
+                  "severity": "page",
+                  "slo": "telemetry"
+                },
+                "annotations": {
+                  "dashboard_uid": "chatwoot-sre-unal",
+                  "description": "Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar los datos ausentes como cumplimiento.",
+                  "next_action": "Revisar targets de Prometheus y las métricas del componente afectado.",
+                  "summary": "Telemetría de Chatwoot incompleta o inaccesible"
+                },
+                "startsAt": "2026-11-02T23:52:12.856Z",
+                "endsAt": "0001-01-01T00:00:00Z",
+                "generatorURL": "http://a24a69f46d3b:9090/graph?g0.expr=max+by+%28project%2C+environment%29+%28count+by+%28project%2C+environment%29+%28up%7Benvironment%3D%22lab%22%2Cjob%3D~%22chatwoot-http%7Cchatwoot-dependencies%7Cchatwoot-resources%22%2Cproject%3D%22devops-grupo7%22%7D+%3D%3D+0%29+or+absent%28up%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-http%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28up%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28up%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-resources%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_chatwoot%3Ahttp_telemetry_valid%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_dependency_probe_success%7Bdependency%3D%22postgres%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_dependency_probes_total%7Bdependency%3D%22postgres%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_dependency_probe_duration_seconds_count%7Bdependency%3D%22postgres%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_dependency_probe_success%7Bdependency%3D%22redis%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_dependency_probes_total%7Bdependency%3D%22redis%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_dependency_probe_duration_seconds_count%7Bdependency%3D%22redis%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_postgres_transactions_total%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_redis_commands_processed_total%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_postgres_connections%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_postgres_max_connections%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_container_memory_working_set_bytes%7Bcomponent%3D%22rails%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-resources%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_container_memory_working_set_bytes%7Bcomponent%3D%22sidekiq%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-resources%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_container_memory_working_set_bytes%7Bcomponent%3D%22postgres%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-resources%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_container_memory_working_set_bytes%7Bcomponent%3D%22redis%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-resources%22%2Cproject%3D%22devops-grupo7%22%7D%29%29&g0.tab=1",
+                "fingerprint": "eb759c151d5d414c"
+              }
+            ],
+            "notification_reason": "first notification",
+            "groupLabels": {
+              "environment": "lab",
+              "project": "devops-grupo7",
+              "slo": "telemetry"
+            },
+            "commonLabels": {
+              "alertname": "ChatwootTelemetryMissing",
+              "environment": "lab",
+              "project": "devops-grupo7",
+              "severity": "page",
+              "slo": "telemetry"
+            },
+            "commonAnnotations": {
+              "dashboard_uid": "chatwoot-sre-unal",
+              "description": "Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar los datos ausentes como cumplimiento.",
+              "next_action": "Revisar targets de Prometheus y las métricas del componente afectado.",
+              "summary": "Telemetría de Chatwoot incompleta o inaccesible"
+            },
+            "routeLabels": {},
+            "externalURL": "http://563536d75a3b:9093",
+            "version": "4",
+            "groupKey": "{}:{environment=\"lab\", project=\"devops-grupo7\", slo=\"telemetry\"}",
+            "truncatedAlerts": 0
+          }
+        }
+      ]
+    },
+    {
+      "check": "ChatwootTelemetryMissing inactive",
+      "at": "2026-11-02T23:52:58.095332+00:00",
+      "evidence": true
+    },
+    {
+      "check": "ChatwootTelemetryMissing webhook resolved",
+      "at": "2026-11-02T23:53:28.245974+00:00",
+      "evidence": [
+        {
+          "id": 12,
+          "received_at": "2026-11-02T23:53:27.815819+00:00",
+          "payload": {
+            "receiver": "local-webhook",
+            "status": "resolved",
+            "alerts": [
+              {
+                "status": "resolved",
+                "labels": {
+                  "alertname": "ChatwootTelemetryMissing",
+                  "environment": "lab",
+                  "project": "devops-grupo7",
+                  "severity": "page",
+                  "slo": "telemetry"
+                },
+                "annotations": {
+                  "dashboard_uid": "chatwoot-sre-unal",
+                  "description": "Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar los datos ausentes como cumplimiento.",
+                  "next_action": "Revisar targets de Prometheus y las métricas del componente afectado.",
+                  "summary": "Telemetría de Chatwoot incompleta o inaccesible"
+                },
+                "startsAt": "2026-11-02T23:52:12.856Z",
+                "endsAt": "2026-11-02T23:52:42.856Z",
+                "generatorURL": "http://a24a69f46d3b:9090/graph?g0.expr=max+by+%28project%2C+environment%29+%28count+by+%28project%2C+environment%29+%28up%7Benvironment%3D%22lab%22%2Cjob%3D~%22chatwoot-http%7Cchatwoot-dependencies%7Cchatwoot-resources%22%2Cproject%3D%22devops-grupo7%22%7D+%3D%3D+0%29+or+absent%28up%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-http%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28up%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28up%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-resources%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_chatwoot%3Ahttp_telemetry_valid%3Aratio%7Benvironment%3D%22lab%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_dependency_probe_success%7Bdependency%3D%22postgres%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_dependency_probes_total%7Bdependency%3D%22postgres%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_dependency_probe_duration_seconds_count%7Bdependency%3D%22postgres%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_dependency_probe_success%7Bdependency%3D%22redis%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_dependency_probes_total%7Bdependency%3D%22redis%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_dependency_probe_duration_seconds_count%7Bdependency%3D%22redis%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_postgres_transactions_total%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_redis_commands_processed_total%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_postgres_connections%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_postgres_max_connections%7Benvironment%3D%22lab%22%2Cjob%3D%22chatwoot-dependencies%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_container_memory_working_set_bytes%7Bcomponent%3D%22rails%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-resources%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_container_memory_working_set_bytes%7Bcomponent%3D%22sidekiq%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-resources%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_container_memory_working_set_bytes%7Bcomponent%3D%22postgres%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-resources%22%2Cproject%3D%22devops-grupo7%22%7D%29+or+absent%28unal_container_memory_working_set_bytes%7Bcomponent%3D%22redis%22%2Cenvironment%3D%22lab%22%2Cjob%3D%22chatwoot-resources%22%2Cproject%3D%22devops-grupo7%22%7D%29%29&g0.tab=1",
+                "fingerprint": "eb759c151d5d414c"
+              }
+            ],
+            "notification_reason": "all alerts resolved",
+            "groupLabels": {
+              "environment": "lab",
+              "project": "devops-grupo7",
+              "slo": "telemetry"
+            },
+            "commonLabels": {
+              "alertname": "ChatwootTelemetryMissing",
+              "environment": "lab",
+              "project": "devops-grupo7",
+              "severity": "page",
+              "slo": "telemetry"
+            },
+            "commonAnnotations": {
+              "dashboard_uid": "chatwoot-sre-unal",
+              "description": "Durante dos minutos falta un target, una serie requerida o la validación de métricas HTTP. No interpretar los datos ausentes como cumplimiento.",
+              "next_action": "Revisar targets de Prometheus y las métricas del componente afectado.",
+              "summary": "Telemetría de Chatwoot incompleta o inaccesible"
+            },
+            "routeLabels": {},
+            "externalURL": "http://563536d75a3b:9093",
+            "version": "4",
+            "groupKey": "{}:{environment=\"lab\", project=\"devops-grupo7\", slo=\"telemetry\"}",
+            "truncatedAlerts": 0
+          }
+        }
+      ]
+    }
+  ],
+  "passed": true,
+  "finished_at": "2026-11-02T23:53:28.266824+00:00"
+}
