@@ -18,7 +18,7 @@ x-app: &app
     SIDEKIQ_CONCURRENCY: '5'
   volumes:
     - storage:/app/storage
-    - /srv/chatwoot/cd/demo-gcp.html:/app/public/demo-gcp.html:ro
+    - ${DEMO_FILE:-/srv/chatwoot/cd/demo-gcp.html}:/app/public/demo-gcp.html:ro
   networks: [chatwoot]
   restart: unless-stopped
   stop_grace_period: 60s

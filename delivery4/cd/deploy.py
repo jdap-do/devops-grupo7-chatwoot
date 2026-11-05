@@ -71,6 +71,12 @@ def switch(target):
         raise
 
 
+def slot_environment(image, slot):
+    # Cada slot conserva la pagina de su release, incluido al volver a la version anterior.
+    demo = SOURCE.parent / 'app/demo-gcp.html'
+    return f'CHATWOOT_IMAGE={image}\nSLOT_PORT={PORTS[slot]}\nDEMO_FILE={demo}\n'
+
+
 def compose(slot, *args):
     settings = dict(line.split('=', 1) for line in (ROOT / f'{slot}.env').read_text().splitlines())
     return run('docker', 'compose', '-p', f'devops-grupo7-{slot}',
@@ -176,7 +182,7 @@ def deploy(image, revision, rollback=False, source_revision=None, source_tree=No
             state['previous'] = None
             atomic(ROOT / 'state.json', json.dumps(state, indent=2))
         # Instalar la configuracion inmutable de esta candidata, sin cargarla como shell.
-        atomic(ROOT / f'{slot}.env', f'CHATWOOT_IMAGE={image}\nSLOT_PORT={PORTS[slot]}\n')
+        atomic(ROOT / f'{slot}.env', slot_environment(image, slot))
         compose(slot, 'pull')
         # Fallar antes de arrancar si requiere migraciones; no alterar el esquema compartido.
         compose(slot, 'run', '--rm', '--no-deps', 'rails', 'db:abort_if_pending_migrations')
