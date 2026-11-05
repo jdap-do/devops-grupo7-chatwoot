@@ -155,7 +155,8 @@ def deploy(image, revision, rollback=False):
         print('La revision ya esta activa y responde; no recrear contenedores')
         return
     # No reciclar una version a la que aun apuntan conexiones de workers anteriores.
-    workers = run('docker', 'top', 'grupo7-router', '-eo', 'args', capture=True)
+    # Docker necesita PID en la salida de ps para identificar los procesos.
+    workers = run('docker', 'top', 'grupo7-router', '-eo', 'pid,args', capture=True)
     if 'worker process is shutting down' in workers:
         raise RuntimeError('Quedan conexiones anteriores drenando; no reciclar slots todavia')
     if rollback:
