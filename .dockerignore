@@ -38,3 +38,9 @@ docker-compose.yml
 .gitattributes
 Dockerfile
 .dockerignore
+
+# Operacion del laboratorio: se transfiere por CD, no forma parte de Chatwoot.
+delivery4
+observability
+infra
+terraform

@@ -49,6 +49,7 @@ jobs:
 
       - name: Test deployment recovery and proxy continuity
         run: |
+          python -m unittest discover -s .github/scripts -p 'test_*.py'
           python -m unittest discover -s delivery4/cd -p 'test_*.py'
           python delivery4/cd/smoke_proxy.py
 
@@ -71,7 +72,7 @@ jobs:
           docker compose -p devops-grupo7-blue -f delivery4/cd/slots.yml config --quiet
           docker compose -f delivery4/cd/proxy.yml config --quiet
 
-  # Tras superar lint, construye y escanea la imagen; un push a main permite publicarla en GHCR.
+  # Tras superar lint, construye y escanea la imagen; los pushes confiables permiten publicarla en GHCR.
   build-scan:
     name: Build, Scan and Publish
     needs: lint
@@ -79,9 +80,12 @@ jobs:
     timeout-minutes: 60
     outputs:
       image: ${{ steps.publish.outputs.image }}
+      source_revision: ${{ steps.selected.outputs.source_revision }}
+      source_tree: ${{ steps.image.outputs.tree }}
     permissions:
       contents: read
       packages: write
+      actions: read
     steps:
       # Descarga el codigo en este runner, que es independiente del utilizado por el job lint.
       - name: Check Out Repository
@@ -93,16 +97,33 @@ jobs:
         id: image
         env:
           REPOSITORY: ${{ github.repository }}
-        run: echo "name=ghcr.io/${REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+        run: |
+          {
+            echo "name=ghcr.io/${REPOSITORY,,}"
+            echo "tree=$(git rev-parse 'HEAD^{tree}')"
+          } >> "$GITHUB_OUTPUT"
+
+      # Una candidata solo se publica desde un push confiable despues de pasar seguridad.
+      # main comprueba el arbol Git completo y una ejecucion previa aprobada; nunca un PR.
+      - name: Reuse validated candidate with identical source tree
+        id: reuse
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IMAGE: ${{ steps.image.outputs.name }}
+          SOURCE_TREE: ${{ steps.image.outputs.tree }}
+        run: python .github/scripts/reuse_candidate.py
 
       # Prepara el builder de BuildKit que construye la imagen y administra las caches.
       - name: Set Up Docker Buildx
+        if: steps.reuse.outputs.reused != 'true'
         uses: docker/setup-buildx-action@v4
         id: buildx
 
       # La cache de capas no conserva los mounts de descarga entre runners.
       # Restaura descargas segun los lockfiles; al terminar el job guarda una nueva clave si corresponde.
       - name: Restore Bundler and pnpm Downloads
+        if: steps.reuse.outputs.reused != 'true'
         id: dependency-cache
         uses: actions/cache@v4
         with:
@@ -113,6 +134,7 @@ jobs:
 
       # Inyecta las descargas en los mounts de BuildKit y las extrae al finalizar para conservarlas en CI.
       - name: Reuse Downloads in BuildKit
+        if: steps.reuse.outputs.reused != 'true'
         uses: reproducible-containers/buildkit-cache-dance@v3.3.0
         with:
           builder: ${{ steps.buildx.outputs.name }}
@@ -126,6 +148,7 @@ jobs:
       # Construye para linux/amd64, registra el SHA y carga la imagen local para escanearla antes de publicarla.
       # Reutiliza y exporta capas intermedias de dependencias y recursos con cache mode=max.
       - name: Build Image Without Publishing
+        if: steps.reuse.outputs.reused != 'true'
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -134,16 +157,34 @@ jobs:
           load: true
           push: false
           tags: ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
-          build-args: SOURCE_REVISION=${{ github.sha }}
+          build-args: |
+            SOURCE_REVISION=${{ github.sha }}
+            SOURCE_TREE=${{ steps.image.outputs.tree }}
           cache-from: type=gha,scope=grupo7
           cache-to: type=gha,mode=max,scope=grupo7
+
+      - name: Select immutable candidate or newly built image
+        id: selected
+        env:
+          REUSED: ${{ steps.reuse.outputs.reused }}
+          CANDIDATE: ${{ steps.reuse.outputs.image }}
+          CANDIDATE_REVISION: ${{ steps.reuse.outputs.source_revision }}
+          BUILT_IMAGE: ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
+        run: |
+          if [[ "$REUSED" == true ]]; then
+            echo "image=$CANDIDATE" >> "$GITHUB_OUTPUT"
+            echo "source_revision=$CANDIDATE_REVISION" >> "$GITHUB_OUTPUT"
+          else
+            echo "image=$BUILT_IMAGE" >> "$GITHUB_OUTPUT"
+            echo "source_revision=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+          fi
 
       # 3. Escaneo estatico de vulnerabilidades de la imagen construida.
       # Genera un JSON con todas las severidades, incluidos hallazgos sin parche; este informe no bloquea por hallazgos.
       - name: Generate Full Vulnerability Report
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
+          image-ref: ${{ steps.selected.outputs.image }}
           scanners: vuln
           format: json
           output: trivy-report.json
@@ -162,7 +203,7 @@ jobs:
       # La excepcion temporal requiere probar la politica en la misma imagen escaneada.
       - name: Validate ImageMagick Security Policy
         env:
-          IMAGE: ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
+          IMAGE: ${{ steps.selected.outputs.image }}
         run: python .github/scripts/check_image_policy.py "$IMAGE"
 
       # Conserva el reporte completo y bloquea todas las criticas corregibles salvo
@@ -170,10 +211,10 @@ jobs:
       - name: Block Fixable Critical Vulnerabilities
         run: python .github/scripts/check_critical_vulnerabilities.py trivy-report.json
 
-      # 4. Publicacion automatica de la imagen escaneada en GHCR (solo pushes a main).
-      # Autentica con GITHUB_TOKEN y permiso packages:write; se omite en PR, develop y ejecuciones manuales.
+      # 4. Candidata desde develop; version de despliegue desde main. Nunca desde PR.
+      # Autentica con GITHUB_TOKEN y permiso packages:write; se omite en PR y ejecuciones manuales.
       - name: Log In to GHCR
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
@@ -181,17 +222,24 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Publica la misma imagen escaneada con etiquetas del commit y de la entrega, y escribe su ruta en el resumen.
-      # Se ejecuta solo en un push a main despues de superar las validaciones y el bloqueo de vulnerabilidades.
+      # Se ejecuta solo en pushes a develop o main despues de superar las validaciones y el bloqueo de vulnerabilidades.
       - name: Publish Scanned Image
         id: publish
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
         env:
           IMAGE: ${{ steps.image.outputs.name }}
           REVISION: ${{ github.sha }}
+          SELECTED: ${{ steps.selected.outputs.image }}
+          TREE: ${{ steps.image.outputs.tree }}
         run: |
+          docker tag "$SELECTED" "$IMAGE:sha-$REVISION"
           docker push "$IMAGE:sha-$REVISION"
-          docker tag "$IMAGE:sha-$REVISION" "$IMAGE:4.18.0-grupo7"
-          docker push "$IMAGE:4.18.0-grupo7"
+          docker tag "$IMAGE:sha-$REVISION" "$IMAGE:tree-$TREE"
+          docker push "$IMAGE:tree-$TREE"
+          if [[ "$GITHUB_REF" == refs/heads/main ]]; then
+            docker tag "$IMAGE:sha-$REVISION" "$IMAGE:4.18.0-grupo7"
+            docker push "$IMAGE:4.18.0-grupo7"
+          fi
           digest=$(docker image inspect "$IMAGE:sha-$REVISION" --format '{{index .RepoDigests 0}}')
           echo "image=$digest" >> "$GITHUB_OUTPUT"
           echo "Imagen publicada: $IMAGE:sha-$REVISION" >> "$GITHUB_STEP_SUMMARY"
@@ -207,3 +255,5 @@ jobs:
     with:
       image: ${{ needs.build-scan.outputs.image }}
       revision: ${{ github.sha }}
+      source_revision: ${{ needs.build-scan.outputs.source_revision }}
+      source_tree: ${{ needs.build-scan.outputs.source_tree }}

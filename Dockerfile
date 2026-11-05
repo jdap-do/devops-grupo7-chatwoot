@@ -92,10 +92,6 @@ RUN --mount=type=cache,target=/pnpm/store,sharing=locked \
     && rm -rf spec node_modules tmp/cache; \
     fi
 
-# La revision cambia despues de los recursos para aprovechar su cache.
-# Exigir un identificador de codigo y registrarlo sin necesitar .git dentro del contexto.
-ARG SOURCE_REVISION
-RUN test -n "$SOURCE_REVISION" && printf "%s\n" "$SOURCE_REVISION" > /app/.git_sha
 # MRI no utiliza el binario Java de concurrent-ruby, que pertenece a JRuby.
 # Retirar fuentes C, objetos de compilacion, paquetes descargados y metadatos Git antes de copiar a runtime.
 RUN find /gems/ruby/3.4.0/gems/ \( -name "*.c" -o -name "*.o" \) -delete \
@@ -123,6 +119,16 @@ RUN --mount=type=bind,from=node,source=/usr/local/lib/node_modules,target=/node_
 # Copiar dependencias y codigo compilado sin volver a instalar gems ni construir el frontend.
 COPY --from=pre-builder /gems/ /gems/
 COPY --from=pre-builder /app/ /app/
+
+# Metadatos pequenos al final: un merge no invalida la copia de gems ni los recursos.
+# El arbol Git identifica el contenido; dos commits de merge pueden compartirlo.
+ARG SOURCE_REVISION
+ARG SOURCE_TREE=unknown
+RUN test -n "$SOURCE_REVISION" && test -n "$SOURCE_TREE" \
+    && printf "%s\n" "$SOURCE_REVISION" > /app/.git_sha \
+    && printf "%s\n" "$SOURCE_TREE" > /app/.source_tree
+LABEL org.opencontainers.image.revision="${SOURCE_REVISION}" \
+      io.grupo7.source-tree="${SOURCE_TREE}"
 
 # Compose proporciona el comando de Rails o Sidekiq para la misma imagen.
 # EXPOSE documenta el puerto interno; su publicacion en el host se configura en Compose.

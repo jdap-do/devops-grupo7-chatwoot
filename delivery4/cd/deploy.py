@@ -146,7 +146,7 @@ def init():
     print('Proxy inicializado: puerto 3001; original conservada en 3000')
 
 
-def deploy(image, revision, rollback=False):
+def deploy(image, revision, rollback=False, source_revision=None, source_tree=None):
     state = json.loads((ROOT / 'state.json').read_text())
     old = state['active']
     client = json.loads(CLIENT.read_text())
@@ -167,6 +167,10 @@ def deploy(image, revision, rollback=False):
     else:
         slot = 'green' if old['slot'] == 'blue' else 'blue'
         target = {'slot': slot, 'image': image, 'revision': revision}
+        if source_revision:
+            target['source_revision'] = source_revision
+        if source_tree:
+            target['source_tree'] = source_tree
         if state.get('previous') and state['previous']['slot'] == slot:
             # El slot anterior se recicla. No ofrecer rollback a una imagen ya reemplazada.
             state['previous'] = None
@@ -178,8 +182,12 @@ def deploy(image, revision, rollback=False):
         compose(slot, 'run', '--rm', '--no-deps', 'rails', 'db:abort_if_pending_migrations')
         compose(slot, 'up', '-d', '--no-deps', 'rails')
         actual = run('docker', 'exec', container(slot), 'cat', '/app/.git_sha', capture=True).strip()
-        if actual != revision:
-            raise RuntimeError('El SHA de la imagen no coincide con el commit de CI')
+        if actual != (source_revision or revision):
+            raise RuntimeError('El SHA de la imagen no coincide con el commit de construccion')
+        if source_tree:
+            actual_tree = run('docker', 'exec', container(slot), 'cat', '/app/.source_tree', capture=True).strip()
+            if actual_tree != source_tree:
+                raise RuntimeError('El contenido de la imagen no coincide con el arbol aprobado en main')
     ready(target, client)
     watch = Continuity(client)
     watch.thread.start()
@@ -237,6 +245,8 @@ def main():
     parser.add_argument('action', choices=['init', 'deploy', 'rollback'])
     parser.add_argument('--image')
     parser.add_argument('--revision')
+    parser.add_argument('--source-revision')
+    parser.add_argument('--source-tree')
     args = parser.parse_args()
     if os.geteuid() != 0 or not os.path.ismount('/srv/chatwoot'):
         raise SystemExit('Ejecutar con sudo en la VM con disco montado')
@@ -255,7 +265,12 @@ def main():
                 parser.error('Se requiere el digest inmutable de la imagen propia')
             if not re.fullmatch(r'[0-9a-f]{40}', args.revision or ''):
                 parser.error('Se requiere el SHA completo del commit')
-            deploy(args.image, args.revision)
+            if (args.source_revision is None) != (args.source_tree is None):
+                parser.error('Proporcionar juntos commit de construccion y arbol de contenido')
+            for value in (args.source_revision, args.source_tree):
+                if value is not None and not re.fullmatch(r'[0-9a-f]{40}', value):
+                    parser.error('Metadatos de construccion no validos')
+            deploy(args.image, args.revision, source_revision=args.source_revision, source_tree=args.source_tree)
 
 
 if __name__ == '__main__':
