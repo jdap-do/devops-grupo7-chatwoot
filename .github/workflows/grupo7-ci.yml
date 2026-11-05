@@ -64,7 +64,11 @@ jobs:
           CHATWOOT_IMAGE: ghcr.io/jdap-do/devops-grupo7-chatwoot@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
           SLOT_PORT: '3002'
         run: |
-          docker compose -p devops-grupo7-blue -f delivery4/cd/slots.yml config --no-env-resolution --quiet
+          # El runner no tiene /srv/chatwoot/config/app.env. Usar solo valores ficticios.
+          cp .env.entrega.example "$RUNNER_TEMP/cd-example.env"
+          export CHATWOOT_ENV_FILE="$RUNNER_TEMP/cd-example.env"
+          docker compose version
+          docker compose -p devops-grupo7-blue -f delivery4/cd/slots.yml config --quiet
           docker compose -f delivery4/cd/proxy.yml config --quiet
 
   # Tras superar lint, construye y escanea la imagen; un push a main permite publicarla en GHCR.

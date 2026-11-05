@@ -74,7 +74,8 @@ def switch(target):
 def compose(slot, *args):
     settings = dict(line.split('=', 1) for line in (ROOT / f'{slot}.env').read_text().splitlines())
     return run('docker', 'compose', '-p', f'devops-grupo7-{slot}',
-               '-f', str(SOURCE / 'slots.yml'), *args, env={**os.environ, **settings})
+               '-f', str(SOURCE / 'slots.yml'), *args,
+               env={**os.environ, **settings, 'CHATWOOT_ENV_FILE': '/srv/chatwoot/config/app.env'})
 
 
 def read_api(port, client, path='/conversations', revision=None):

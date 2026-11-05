@@ -1,7 +1,7 @@
 # PostgreSQL, Redis y sus volumenes permanecen en el proyecto original.
 x-app: &app
   image: ${CHATWOOT_IMAGE:?Use an immutable image digest}
-  env_file: /srv/chatwoot/config/app.env
+  env_file: ${CHATWOOT_ENV_FILE:-/srv/chatwoot/config/app.env}
   environment:
     RAILS_ENV: production
     NODE_ENV: production
