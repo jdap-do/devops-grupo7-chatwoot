@@ -11,10 +11,10 @@ def docker(*arguments):
     return subprocess.check_output(["docker", *arguments], text=True, timeout=15).strip()
 
 
-def sample(prefix):
+def sample(prefix, suffix=""):
     result = {}
     for component in ("rails", "sidekiq", "postgres", "redis"):
-        name = f"{prefix}-{component}"
+        name = f"{prefix}-{component}{suffix}"
         try:
             # cgroup v2 reports exact bytes. Working set follows Docker's cache subtraction.
             values = docker("exec", name, "cat", "/sys/fs/cgroup/memory.current",
@@ -35,13 +35,15 @@ def sample(prefix):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--prefix", default="devops-grupo7-e2")
+    parser.add_argument("--suffix", default="", help="Compose suffix, e.g. -1; empty preserves local names")
+    parser.add_argument("--directory", type=Path, help="Output directory; defaults to local .runtime")
     parser.add_argument("--once", action="store_true")
     args = parser.parse_args()
-    directory = Path(__file__).resolve().parents[1] / ".runtime"
-    directory.mkdir(exist_ok=True)
+    directory = args.directory or Path(__file__).resolve().parents[1] / ".runtime"
+    directory.mkdir(parents=True, exist_ok=True)
     while True:
         started = time.monotonic()
-        result = sample(args.prefix)
+        result = sample(args.prefix, args.suffix)
         temporary = directory / "resources.tmp"
         temporary.write_text(json.dumps(result), encoding="utf-8")
         os.replace(temporary, directory / "resources.json")

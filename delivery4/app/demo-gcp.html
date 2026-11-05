@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prueba Chatwoot GCP - Grupo 7</title>
+<body>
+  <h1>Atención al cliente - Grupo 7</h1>
+  <p>Abre el chat, envía un mensaje de prueba y comprueba la respuesta del agente.</p>
+  <p id="status">Preparando el widget…</p>
+  <script>
+    // El website token identifica una bandeja pública; no es un token personal API.
+    // Pasarlo por query permite usar la página sin fijar datos de una instalación.
+    const token = new URLSearchParams(location.search).get('token');
+    if (!token) {
+      document.getElementById('status').textContent = 'Falta el parámetro token de la bandeja Website.';
+    } else {
+      const sdk = document.createElement('script');
+      sdk.src = location.origin + '/packs/js/sdk.js';
+      sdk.onload = () => {
+        window.chatwootSDK.run({ websiteToken: token, baseUrl: location.origin });
+        document.getElementById('status').textContent = 'SDK cargado. Comprueba que aparece el botón de chat.';
+      };
+      sdk.onerror = () => {
+        document.getElementById('status').textContent = 'No se pudo cargar el SDK.';
+      };
+      document.head.appendChild(sdk);
+    }
+  </script>
+</body>
+</html>
