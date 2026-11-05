@@ -50,6 +50,8 @@ try:
                '--mount', f'type=bind,source={path},target=/etc/nginx/conf.d,readonly', NGINX)
         containers.append(router)
         docker('exec', router, 'nginx', '-t')
+        processes = docker('top', router, '-eo', 'pid,args')
+        assert 'PID' in processes and 'nginx' in processes, processes
         # Esperar a los servidores antes de iniciar la medicion de cambio.
         docker('exec', containers[0], 'python', '-c',
                'import time,urllib.request\n'
