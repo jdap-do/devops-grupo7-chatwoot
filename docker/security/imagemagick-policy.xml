@@ -1,0 +1,5 @@
+<!-- Reglas adicionales: GHSA-f3w6-w445-fwh9. Conservar la politica del sistema. -->
+<policy domain="coder" rights="none" pattern="{MSL,EPHEMERAL,TEXT,MPC,SHOW,WIN,PLT,URL,HTTP,HTTPS,FTP,FILE}"/>
+<policy domain="delegate" rights="none" pattern="gs"/>
+<policy domain="coder" rights="none" pattern="{PS,PS2,PS3,EPS,EPS2,EPS3,EPI,EPSF,EPSI,EPT,EPT2,EPT3,PDF,AI,EPDF,PDFA,POCKETMOD,XPS,PCL}"/>
+<policy domain="path" rights="none" pattern="@*"/>

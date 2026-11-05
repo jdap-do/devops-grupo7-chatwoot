@@ -1,0 +1,13 @@
+# Aplicar después de observability/compose.yml; rutas relativas a observability/.
+services:
+  grafana:
+    environment:
+      # Grafana 12.4 compara hostname, sin esquema ni ruta. No usar comodines.
+      GF_SECURITY_CSRF_TRUSTED_ORIGINS: ${GRAFANA_PREVIEW_HOST:-localhost}
+  resource-exporter:
+    volumes:
+      # Solo muestras de recursos, sin montar secretos ni el socket Docker.
+      - ./.runtime/resources:/data:ro
+networks:
+  chatwoot:
+    name: devops-grupo7-gcp-network

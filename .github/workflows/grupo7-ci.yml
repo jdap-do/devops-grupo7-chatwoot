@@ -132,18 +132,16 @@ jobs:
           path: trivy-report.json
           if-no-files-found: warn
 
-      # Detiene el job si encuentra vulnerabilidades CRITICAL con correccion disponible.
-      # Reutiliza Trivy instalado en el primer escaneo; los otros hallazgos siguen visibles en el JSON completo.
+      # La excepcion temporal requiere probar la politica en la misma imagen escaneada.
+      - name: Validate ImageMagick Security Policy
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
+        run: python .github/scripts/check_image_policy.py "$IMAGE"
+
+      # Conserva el reporte completo y bloquea todas las criticas corregibles salvo
+      # el aviso/version mitigado, con vencimiento y pruebas obligatorias anteriores.
       - name: Block Fixable Critical Vulnerabilities
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          image-ref: ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
-          scanners: vuln
-          format: table
-          severity: CRITICAL
-          ignore-unfixed: true
-          exit-code: '1'
-          skip-setup-trivy: true
+        run: python .github/scripts/check_critical_vulnerabilities.py trivy-report.json
 
       # 4. Publicacion automatica de la imagen escaneada en GHCR (solo pushes a main).
       # Autentica con GITHUB_TOKEN y permiso packages:write; se omite en PR, develop y ejecuciones manuales.

@@ -1,0 +1,78 @@
+name: Group 7 - GCP Connection
+
+# Prueba explícita de identidad y acceso. No actualiza la aplicación.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  connect:
+    if: github.repository_id == '1413754542' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_ZONE: ${{ vars.GCP_ZONE }}
+      GCP_INSTANCE: ${{ vars.GCP_INSTANCE }}
+      GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+    steps:
+      - name: Check repository variables
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in GCP_PROJECT_ID GCP_ZONE GCP_INSTANCE GCP_SERVICE_ACCOUNT GCP_WORKLOAD_IDENTITY_PROVIDER; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing repository variable: $name"
+              exit 1
+            fi
+          done
+
+      - name: Check out trusted source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Authenticate to GCP without service account keys
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Check VM state without starting it
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=$(gcloud compute instances describe "$GCP_INSTANCE" \
+            --project="$GCP_PROJECT_ID" --zone="$GCP_ZONE" --format='value(status)')
+          if [[ "$status" != RUNNING ]]; then
+            echo "::error::Lab VM is $status. Start it deliberately before running this check."
+            exit 1
+          fi
+
+      - name: Verify IAP, OS Login and Docker access
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud compute ssh "$GCP_INSTANCE" \
+            --project="$GCP_PROJECT_ID" --zone="$GCP_ZONE" \
+            --tunnel-through-iap --quiet --ssh-key-expire-after=10m \
+            --command='hostname && sudo -n test -f /srv/chatwoot/bootstrap-ready && sudo -n docker ps --format "table {{.Names}}\t{{.Status}}"'
+
+      - name: Summarize verified access
+        shell: bash
+        run: |
+          {
+            echo '### GCP connection verified'
+            echo 'Temporary identity, running VM, IAP, OS Login and Docker access checked.'
+            echo 'No application deployment, container restart or incident was performed.'
+          } >> "$GITHUB_STEP_SUMMARY"
