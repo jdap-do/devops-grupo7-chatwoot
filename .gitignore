@@ -121,3 +121,5 @@ terraform.rc
 credentials.tfrc.json
 state-backend.local.tf
 # Versionar .terraform.lock.hcl y ejemplos sin credenciales (*.tfvars.example).
+# Credenciales temporales emitidas por la acción oficial de autenticación GCP.
+gha-creds-*.json

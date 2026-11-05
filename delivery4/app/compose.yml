@@ -1,0 +1,89 @@
+# Adaptación del Compose de Entrega 1 al anfitrión GCP creado con Terraform.
+# Sin build en el servidor: se descarga la imagen propia publicada del equipo.
+name: devops-grupo7-gcp
+x-app: &app
+  image: ${CHATWOOT_IMAGE:-ghcr.io/jdap-do/devops-grupo7-chatwoot@sha256:a07e19d2e177ca98acd3b00460e8366bc24bbc0268b0dcceb6566ed4516005e9}
+  env_file: /srv/chatwoot/config/app.env
+  environment:
+    RAILS_ENV: production
+    NODE_ENV: production
+    INSTALLATION_ENV: docker
+    RAILS_LOG_TO_STDOUT: 'true'
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: '5432'
+    POSTGRES_DATABASE: chatwoot_production
+    POSTGRES_USERNAME: postgres
+    REDIS_URL: redis://redis:6379
+    ACTIVE_STORAGE_SERVICE: local
+  volumes:
+    - storage_data:/app/storage
+  networks: [chatwoot]
+services:
+  postgres:
+    image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+    environment:
+      POSTGRES_DB: chatwoot_production
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Initialize app.env first}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U postgres -d chatwoot_production']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [chatwoot]
+    restart: unless-stopped
+  redis:
+    image: redis:7.4-alpine@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Initialize app.env first}
+    command: [sh, -c, 'exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"']
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [CMD-SHELL, 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -qx PONG']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [chatwoot]
+    restart: unless-stopped
+  prepare:
+    <<: *app
+    entrypoint: [bundle, exec, rails]
+    command: [db:chatwoot_prepare]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: 'no'
+  rails:
+    <<: *app
+    entrypoint: [bundle, exec, rails]
+    command: [s, -p, '3000', -b, 0.0.0.0]
+    ports:
+      - '127.0.0.1:3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+  sidekiq:
+    <<: *app
+    entrypoint: [bundle, exec, sidekiq]
+    command: [-C, config/sidekiq.yml]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+networks:
+  chatwoot:
+    name: devops-grupo7-gcp-network
+volumes:
+  postgres_data:
+  redis_data:
+  storage_data:

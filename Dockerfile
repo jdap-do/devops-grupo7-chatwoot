@@ -29,6 +29,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && gem install bundler -v "$BUNDLER_VERSION" --no-document
 
+# Mitigacion oficial de Active Storage: agregar restricciones sin perder las de Debian.
+COPY docker/security/imagemagick-policy.xml /tmp/grupo7-imagemagick-policy.xml
+RUN test -f /etc/ImageMagick-6/policy.xml \
+    && grep -q '</policymap>' /etc/ImageMagick-6/policy.xml \
+    && sed -i '/^[[:space:]]*<\/policymap>/e cat /tmp/grupo7-imagemagick-policy.xml' /etc/ImageMagick-6/policy.xml \
+    && rm /tmp/grupo7-imagemagick-policy.xml
+
 # Conservar el ejecutable Node sin incorporar aqui npm ni sus paquetes globales.
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
 # Las instalaciones, recursos y comandos de la aplicacion utilizan /app como directorio de trabajo.
