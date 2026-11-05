@@ -16,7 +16,7 @@ RequiresMountsFor=/srv/chatwoot
 [Service]
 Type=simple
 WorkingDirectory=/srv/chatwoot/repo
-ExecStart=/usr/bin/python3 /srv/chatwoot/repo/observability/scripts/collect-resources.py --prefix devops-grupo7-gcp --suffix=-1 --directory /srv/chatwoot/repo/observability/.runtime/resources
+ExecStart=/usr/bin/python3 /srv/chatwoot/repo/observability/scripts/collect-resources.py --prefix devops-grupo7-gcp --suffix=-1 --directory /srv/chatwoot/repo/observability/.runtime/resources --deployment-state /srv/chatwoot/cd/state.json
 Restart=on-failure
 RestartSec=10
 UMask=0022

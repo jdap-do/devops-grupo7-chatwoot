@@ -1,0 +1,80 @@
+name: Group 7 - GCP Deployment
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string
+      revision:
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  deploy:
+    if: github.repository_id == '1413754542' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    concurrency:
+      group: grupo7-gcp-deployment
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      ZONE: ${{ vars.GCP_ZONE }}
+      INSTANCE: ${{ vars.GCP_INSTANCE }}
+      IMAGE: ${{ inputs.image }}
+      REVISION: ${{ inputs.revision }}
+      RELEASE: ${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Check out validated source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate deployment inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$REVISION" == "$GITHUB_SHA" ]]
+          [[ "$REVISION" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$IMAGE" =~ ^ghcr.io/jdap-do/devops-grupo7-chatwoot@sha256:[0-9a-f]{64}$ ]]
+          [[ -n "$PROJECT" && -n "$ZONE" && -n "$INSTANCE" ]]
+          tar -czf "$RUNNER_TEMP/release.tar.gz" delivery4/cd delivery4/app/demo-gcp.html
+      - name: Authenticate with temporary credentials
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v3
+      - name: Check running VM without starting it
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=$(gcloud compute instances describe "$INSTANCE" --project="$PROJECT" --zone="$ZONE" --format='value(status)')
+          [[ "$status" == RUNNING ]] || { echo '::error::VM detenida. Encenderla deliberadamente antes de desplegar.'; exit 1; }
+      - name: Transfer and deploy validated release
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud compute scp "$RUNNER_TEMP/release.tar.gz" "$INSTANCE:grupo7-$RELEASE.tar.gz" \
+            --project="$PROJECT" --zone="$ZONE" --tunnel-through-iap --quiet
+          remote="sudo -n mkdir -p /srv/chatwoot/releases/$RELEASE"
+          remote+=" && sudo -n tar -xzf grupo7-$RELEASE.tar.gz -C /srv/chatwoot/releases/$RELEASE"
+          remote+=" && sudo -n python3 /srv/chatwoot/releases/$RELEASE/delivery4/cd/deploy.py deploy"
+          remote+=" --image '$IMAGE' --revision '$REVISION'"
+          gcloud compute ssh "$INSTANCE" --project="$PROJECT" --zone="$ZONE" \
+            --tunnel-through-iap --quiet --ssh-key-expire-after=10m \
+            --command="$remote"
+      - name: Summarize deployment
+        shell: bash
+        run: |
+          {
+            echo '### Despliegue y lecturas API autenticadas verificados'
+            echo "Commit: $REVISION"
+            echo "Imagen: $IMAGE"
+            echo 'Evidencia de continuidad disponible en el paso de despliegue y en /srv/chatwoot/cd/deployment-*.json.'
+          } >> "$GITHUB_STEP_SUMMARY"

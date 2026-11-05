@@ -11,10 +11,12 @@ def docker(*arguments):
     return subprocess.check_output(["docker", *arguments], text=True, timeout=15).strip()
 
 
-def sample(prefix, suffix=""):
+def sample(prefix, suffix="", active_slot="legacy"):
     result = {}
     for component in ("rails", "sidekiq", "postgres", "redis"):
         name = f"{prefix}-{component}{suffix}"
+        if component in ("rails", "sidekiq") and active_slot in ("blue", "green"):
+            name = f"devops-grupo7-{active_slot}-{component}-1"
         try:
             # cgroup v2 reports exact bytes. Working set follows Docker's cache subtraction.
             values = docker("exec", name, "cat", "/sys/fs/cgroup/memory.current",
@@ -38,12 +40,16 @@ def main():
     parser.add_argument("--suffix", default="", help="Compose suffix, e.g. -1; empty preserves local names")
     parser.add_argument("--directory", type=Path, help="Output directory; defaults to local .runtime")
     parser.add_argument("--once", action="store_true")
+    parser.add_argument("--deployment-state", type=Path, help="Estado opcional del CD GCP")
     args = parser.parse_args()
     directory = args.directory or Path(__file__).resolve().parents[1] / ".runtime"
     directory.mkdir(parents=True, exist_ok=True)
     while True:
         started = time.monotonic()
-        result = sample(args.prefix, args.suffix)
+        slot = "legacy"
+        if args.deployment_state and args.deployment_state.exists():
+            slot = json.loads(args.deployment_state.read_text())["active"]["slot"]
+        result = sample(args.prefix, args.suffix, slot)
         temporary = directory / "resources.tmp"
         temporary.write_text(json.dumps(result), encoding="utf-8")
         os.replace(temporary, directory / "resources.json")
