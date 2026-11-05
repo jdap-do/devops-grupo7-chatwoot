@@ -95,6 +95,37 @@ class DeploymentTests(unittest.TestCase):
         evidence = json.loads(next(self.root.glob('deployment-*.json')).read_text())
         self.assertFalse(evidence['committed'])
 
+    def test_promoted_image_keeps_distinct_source_and_release_revisions(self):
+        source, tree = 'd' * 40, 'e' * 40
+
+        def command(*args, **kwargs):
+            if '/app/.git_sha' in args:
+                return source
+            if '/app/.source_tree' in args:
+                return tree
+            return ''
+
+        with patch.object(cd, 'run', side_effect=command), patch.object(cd, 'compose'), patch.object(cd, 'ready', side_effect=RuntimeError('reached-readiness')) as ready:
+            with self.assertRaisesRegex(RuntimeError, 'reached-readiness'):
+                cd.deploy(IMAGE, SHA, source_revision=source, source_tree=tree)
+        self.assertEqual(ready.call_args.args[0]['revision'], SHA)
+        self.assertEqual(ready.call_args.args[0]['source_revision'], source)
+        self.assertEqual(ready.call_args.args[0]['source_tree'], tree)
+
+    def test_wrong_image_source_or_content_never_reaches_readiness(self):
+        for actual_source, actual_tree in [('f' * 40, 'e' * 40), ('d' * 40, 'f' * 40)]:
+            def command(*args, **kwargs):
+                if '/app/.git_sha' in args:
+                    return actual_source
+                if '/app/.source_tree' in args:
+                    return actual_tree
+                return ''
+
+            with patch.object(cd, 'run', side_effect=command), patch.object(cd, 'compose'), patch.object(cd, 'ready') as ready:
+                with self.assertRaises(RuntimeError):
+                    cd.deploy(IMAGE, SHA, source_revision='d' * 40, source_tree='e' * 40)
+            ready.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()
