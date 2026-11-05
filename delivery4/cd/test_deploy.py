@@ -31,6 +31,15 @@ class DeploymentTests(unittest.TestCase):
         self.client_patch.start()
         self.addCleanup(self.client_patch.stop)
 
+    def test_demo_is_bound_to_its_release(self):
+        with patch.object(cd, 'SOURCE', Path('/srv/chatwoot/releases/first/delivery4/cd')):
+            first = cd.slot_environment(IMAGE, 'blue')
+        with patch.object(cd, 'SOURCE', Path('/srv/chatwoot/releases/second/delivery4/cd')):
+            second = cd.slot_environment(IMAGE, 'green')
+        self.assertIn('DEMO_FILE=/srv/chatwoot/releases/first/delivery4/app/demo-gcp.html\n', first)
+        self.assertIn('DEMO_FILE=/srv/chatwoot/releases/second/delivery4/app/demo-gcp.html\n', second)
+        self.assertNotIn('/second/', first)
+
     def test_route_rejects_injection(self):
         with self.assertRaises(ValueError):
             cd.route('blue;bad', SHA)
