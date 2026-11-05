@@ -34,6 +34,8 @@ try:
                'from http.server import BaseHTTPRequestHandler,HTTPServer\n'
                'class Handler(BaseHTTPRequestHandler):\n'
                ' def do_GET(self):\n'
+               '  if self.headers.get("api_access_token") != "fixture-token":\n'
+               '   self.send_response(401); self.end_headers(); return\n'
                '  self.send_response(200); self.end_headers(); self.wfile.write(b"{\\\"fixture\\\":true}")\n'
                ' def log_message(self,*args): pass\n'
                'HTTPServer(("0.0.0.0",3000),Handler).serve_forever()')
@@ -53,7 +55,8 @@ try:
                'import time,urllib.request\n'
                'for n in range(40):\n'
                ' try:\n'
-               '  urllib.request.urlopen("http://router:8080/",timeout=2).read(); break\n'
+               '  req=urllib.request.Request("http://router:8080/",headers={"api_access_token":"fixture-token"})\n'
+               '  urllib.request.urlopen(req,timeout=2).read(); break\n'
                ' except Exception: time.sleep(.25)\n'
                'else: raise SystemExit("proxy not ready")')
         probe = subprocess.Popen(['docker', 'exec', containers[0], 'python', '-c',
@@ -61,7 +64,8 @@ try:
             'seen={}; failed=0; end=time.monotonic()+8\n'
             'while time.monotonic()<end:\n'
             ' try:\n'
-            '  with urllib.request.urlopen("http://router:8080/",timeout=2) as r:\n'
+            '  req=urllib.request.Request("http://router:8080/",headers={"api_access_token":"fixture-token"})\n'
+            '  with urllib.request.urlopen(req,timeout=2) as r:\n'
             '   json.loads(r.read()); key=r.headers["X-Group7-Revision"]; seen[key]=seen.get(key,0)+1\n'
             ' except Exception: failed+=1\n'
             ' time.sleep(.05)\n'
