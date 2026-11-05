@@ -36,9 +36,11 @@ write_private(obs / ".env.prober", "\n".join([
     "REDIS_HOST=devops-grupo7-gcp-redis-1",
     "REDIS_PASSWORD=" + settings["REDIS_PASSWORD"], "",
 ]))
+cd_state = Path('/srv/chatwoot/cd/state.json')
+upstream = 'http://grupo7-router:8080' if cd_state.exists() else 'http://devops-grupo7-gcp-rails-1:3000'
 write_private(obs / ".env.gcp", "\n".join([
     "CHATWOOT_NETWORK=devops-grupo7-gcp-network",
-    "CHATWOOT_UPSTREAM_URL=http://devops-grupo7-gcp-rails-1:3000", "",
+    "CHATWOOT_UPSTREAM_URL=" + upstream, "",
 ]))
 # Bind-mount legible para Grafana; directorio padre 0700 protege acceso en host.
 write_private(runtime / "grafana-admin-password.txt", secrets.token_hex(24) + "\n", 0o444)
@@ -49,7 +51,9 @@ if not client.exists():
     ruby = ("u=User.find_by!(email: 'admin@example.com'); a=u.accounts.first!; "
             "c=a.conversations.first!; puts '__CLIENT__'+"
             "{token:u.access_token.token,account_id:a.id,conversation_id:c.display_id}.to_json")
-    result = subprocess.run(["docker", "exec", "devops-grupo7-gcp-rails-1",
+    slot = json.loads(cd_state.read_text())['active']['slot'] if cd_state.exists() else 'legacy'
+    rails = 'devops-grupo7-gcp-rails-1' if slot == 'legacy' else f'devops-grupo7-{slot}-rails-1'
+    result = subprocess.run(["docker", "exec", rails,
                              "bundle", "exec", "rails", "runner", ruby],
                             capture_output=True, text=True, timeout=120)
     lines = [line[len("__CLIENT__"):] for line in result.stdout.splitlines()

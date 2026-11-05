@@ -1,7 +1,15 @@
 # Conexión de GitHub Actions con GCP
 
-Estado: identidad preparada en Terraform; sin permisos aplicados ni despliegue
-desde Actions demostrado. El arranque manual comprobado no equivale a CD.
+Estado actual: identidad aplicada y conexion desde Actions comprobada en main.
+La ejecucion [42056362087](https://github.com/jdap-do/devops-grupo7-chatwoot/actions/runs/42056362087)
+termino correctamente y verifico identidad temporal, VM encendida, IAP, OS Login
+y Docker. No desplego ni reinicio contenedores.
+
+Siguiente fase: [despliegue mediante versiones alternas](../../delivery4/cd/README.md).
+La implementacion esta preparada con pruebas locales; activacion y evidencia
+real de actualizacion, reversion y continuidad en GCP siguen pendientes.
+Las notas siguientes conservan la secuencia de preparacion de la identidad;
+los pendientes historicos de conexion ya quedaron resueltos por esa ejecucion.
 
 Actualización: el usuario aplicó el plan de identidad en Cloud Shell y obtuvo
 `11 added, 0 changed, 0 destroyed`. La identidad y sus permisos ya existen;

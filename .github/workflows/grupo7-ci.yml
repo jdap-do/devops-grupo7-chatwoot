@@ -12,7 +12,8 @@ permissions:
 
 concurrency:
   group: grupo7-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Un nuevo push no debe interrumpir un cambio de trafico ya iniciado en main.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   # Revisa Dockerfile y manifiestos antes de permitir la construccion de la imagen.
@@ -46,12 +47,34 @@ jobs:
           cp .env.entrega.example .env
           docker compose -f docker-compose.yml config --quiet
 
+      - name: Test deployment recovery and proxy continuity
+        run: |
+          python -m unittest discover -s delivery4/cd -p 'test_*.py'
+          python delivery4/cd/smoke_proxy.py
+
+      - name: Validate deployment workflows
+        run: |
+          docker run --rm --network none \
+            --mount "type=bind,source=$PWD,target=/workspace,readonly" \
+            --workdir /workspace rhysd/actionlint:1.7.7 \
+            .github/workflows/grupo7-ci.yml .github/workflows/grupo7-gcp-deploy.yml
+
+      - name: Validate deployment Compose models
+        env:
+          CHATWOOT_IMAGE: ghcr.io/jdap-do/devops-grupo7-chatwoot@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+          SLOT_PORT: '3002'
+        run: |
+          docker compose -p devops-grupo7-blue -f delivery4/cd/slots.yml config --no-env-resolution --quiet
+          docker compose -f delivery4/cd/proxy.yml config --quiet
+
   # Tras superar lint, construye y escanea la imagen; un push a main permite publicarla en GHCR.
   build-scan:
     name: Build, Scan and Publish
     needs: lint
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    outputs:
+      image: ${{ steps.publish.outputs.image }}
     permissions:
       contents: read
       packages: write
@@ -156,6 +179,7 @@ jobs:
       # Publica la misma imagen escaneada con etiquetas del commit y de la entrega, y escribe su ruta en el resumen.
       # Se ejecuta solo en un push a main despues de superar las validaciones y el bloqueo de vulnerabilidades.
       - name: Publish Scanned Image
+        id: publish
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           IMAGE: ${{ steps.image.outputs.name }}
@@ -164,4 +188,18 @@ jobs:
           docker push "$IMAGE:sha-$REVISION"
           docker tag "$IMAGE:sha-$REVISION" "$IMAGE:4.18.0-grupo7"
           docker push "$IMAGE:4.18.0-grupo7"
+          digest=$(docker image inspect "$IMAGE:sha-$REVISION" --format '{{index .RepoDigests 0}}')
+          echo "image=$digest" >> "$GITHUB_OUTPUT"
           echo "Imagen publicada: $IMAGE:sha-$REVISION" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-gcp:
+    name: Deploy validated image to GCP
+    needs: build-scan
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.GCP_CD_ENABLED == 'true'
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/grupo7-gcp-deploy.yml
+    with:
+      image: ${{ needs.build-scan.outputs.image }}
+      revision: ${{ github.sha }}
