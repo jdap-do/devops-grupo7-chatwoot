@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh Group 7 public DNS after boot and every two minutes
+
+[Timer]
+OnBootSec=20s
+OnUnitActiveSec=2min
+Unit=grupo7-duckdns.service
+
+[Install]
+WantedBy=timers.target
