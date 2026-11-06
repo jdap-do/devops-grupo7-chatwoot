@@ -1,0 +1,15 @@
+[Unit]
+Description=Update Group 7 public DNS from GCP metadata
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=/srv/chatwoot
+
+[Service]
+Type=oneshot
+User=root
+UMask=0077
+ExecStart=/usr/bin/python3 /srv/chatwoot/public/update-dns.py
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true

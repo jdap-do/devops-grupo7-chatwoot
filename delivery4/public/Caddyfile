@@ -1,0 +1,14 @@
+{
+    admin off
+}
+
+grupo7-chatwoot-unal.duckdns.org {
+    reverse_proxy 127.0.0.1:3001 {
+        # Keep internal HTTP health checks while securing browser cookies at TLS edge.
+        header_down Set-Cookie "(.+)" "$1; Secure"
+    }
+}
+
+grupo7-grafana-unal.duckdns.org {
+    reverse_proxy 127.0.0.1:3005
+}

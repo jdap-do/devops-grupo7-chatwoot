@@ -1,0 +1,13 @@
+name: devops-grupo7-public
+services:
+  caddy:
+    image: caddy@sha256:b060aafbec4f8f5404c80273c8d8758248f157920d0a0cdd5cb5656a527f6ec5
+    container_name: grupo7-public-https
+    # Linux: access the existing loopback bindings without publishing app ports.
+    network_mode: host
+    restart: unless-stopped
+    mem_limit: 256m
+    volumes:
+      - /srv/chatwoot/public/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /srv/chatwoot/public/data:/data
+      - /srv/chatwoot/public/config:/config
