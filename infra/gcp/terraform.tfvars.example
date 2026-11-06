@@ -3,3 +3,5 @@ region         = "us-central1"
 zone           = "us-central1-a"
 name           = "grupo7-chatwoot"
 desired_status = "RUNNING"
+# Activar solo despues de preparar HTTPS y las credenciales de las aplicaciones.
+enable_public_web = false
