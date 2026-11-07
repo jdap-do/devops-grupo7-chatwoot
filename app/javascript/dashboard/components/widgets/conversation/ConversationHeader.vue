@@ -89,10 +89,6 @@ const inbox = computed(() => {
   return store.getters['inboxes/getInbox'](inboxId);
 });
 
-const hasMultipleInboxes = computed(
-  () => store.getters['inboxes/getInboxes'].length > 1
-);
-
 const hasSlaPolicyId = computed(
   () => props.chat?.applied_sla?.id && !currentContact.value?.blocked
 );
@@ -153,8 +149,8 @@ const copyConversationId = async () => {
           >
             {{ `#${chat.id}` }}
           </button>
-          <span v-if="hasMultipleInboxes">•</span>
-          <InboxName v-if="hasMultipleInboxes" :inbox="inbox" class="!mx-0" />
+          <span>•</span>
+          <InboxName :inbox="inbox" class="!mx-0" />
           <span v-if="isSnoozed">•</span>
           <span v-if="isSnoozed" class="font-medium text-n-amber-10">
             {{ snoozedDisplayText }}
