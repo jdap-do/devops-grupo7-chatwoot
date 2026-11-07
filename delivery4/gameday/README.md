@@ -124,16 +124,25 @@ Despues de verificar la degradacion y explicar el diagnostico:
 sudo python3 /srv/chatwoot/gameday/v1/rails-outage.py recover
 ```
 
-`recover` inicia el mismo contenedor si esta detenido y espera hasta 180 segundos
+`recover` inicia el mismo contenedor si esta detenido, valida y recarga Nginx,
+y espera hasta 180 segundos
 para confirmar HTTP 200, JSON de conversaciones y revision correcta por el
 gateway. Esta espera verifica el arranque **despues de la orden manual**. No utiliza
 rollback ni cambia el destino del proxy. Se puede repetir si fallo la comprobacion
 anterior; no reinicia un contenedor que ya esta ejecutandose.
 
+La recarga permite que Nginx vuelva a resolver el nombre del contenedor: Docker
+puede asignar otra IP al iniciar Rails y el router puede conservar la anterior.
+Se ejecuta tambien al repetir `recover` con Rails ya iniciado. El evento
+`router_reloaded` registra la recarga; HTTP 200 sigue siendo necesario para
+confirmar la recuperacion funcional. Si `nginx -t` falla, no se ejecuta la recarga.
+
 Si no recupera, inspeccionar el contenedor y sus logs, corregir la causa y repetir
 `recover`. El evento `command_failed` no equivale a restauracion. Si el script no
 esta disponible, comprobar el ID guardado y arrancar ese contenedor manualmente
-con `sudo docker start <id-registrado>`; verificar despues la lectura autenticada.
+con `sudo docker start <id-registrado>`. Validar y recargar el router con
+`sudo docker exec grupo7-router nginx -t && sudo docker exec grupo7-router nginx -s reload`;
+verificar despues la lectura autenticada.
 
 Mantener trafico nominal y observar al menos cinco minutos de estabilidad,
 acceso funcional, ausencia de errores sostenidos y telemetria valida. Verificar

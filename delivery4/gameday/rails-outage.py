@@ -81,6 +81,10 @@ def recover(state, client):
     event('recovery_started', exercise=state['exercise'], container=state['container'])
     if not details['State']['Running']:
         docker('start', state['container_id'])
+    # Nginx debe resolver de nuevo el nombre si Docker cambio la IP de Rails.
+    docker('exec', 'grupo7-router', 'nginx', '-t')
+    docker('exec', 'grupo7-router', 'nginx', '-s', 'reload')
+    event('router_reloaded', exercise=state['exercise'])
     deadline = time.monotonic() + RECOVERY_TIMEOUT_SECONDS
     while time.monotonic() < deadline:
         try:
