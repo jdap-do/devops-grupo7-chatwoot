@@ -88,6 +88,6 @@ Verificar una consulta autenticada con respuesta HTTP 200 y contenido esperado, 
 
 **Procedimientos de mitigación asociados al runbook.** Revisar latencia, tráfico, errores, recursos y dependencias para identificar el origen. Según el diagnóstico, reducir carga no esencial o revertir el cambio responsable. En una inyección controlada, retirar la demora. Comprobar que las consultas recuperan su latencia nominal bajo una carga comparable y observar estabilidad durante al menos cinco minutos.
 
-El procedimiento de inyección, diagnóstico y recuperación de latencia está implementado y documentado en [delivery4/gameday/LATENCY.md](../delivery4/gameday/LATENCY.md). Su validación en la VM y las evidencias de ejecución quedan pendientes de confirmación.
+El procedimiento de inyección, diagnóstico y recuperación de latencia está implementado y documentado en [delivery4/gameday/LATENCY.md](../delivery4/gameday/LATENCY.md).
 
 En ambos escenarios se registrarán las acciones y sus resultados. Si se agota algún presupuesto de error, se congelarán los cambios no críticos y se priorizará la recuperación.
